@@ -2,8 +2,6 @@ import platformEnv from '@onekeyhq/shared/src/platformEnv';
 
 import { V4SimpleDbEntityHistory } from './v4entity/V4SimpleDbEntityHistory';
 
-
-
 export class V4SimpleDb {
   history = new V4SimpleDbEntityHistory();
 
