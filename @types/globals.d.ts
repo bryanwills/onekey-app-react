@@ -35,6 +35,7 @@ declare global {
   var $$jotaiContextStore: any;
   var $$jotaiContextStorePrint: any;
   var $$simpleDb: any;
+  var $$simpleDbV4: any;
   var $$localDb: LocalDbBase;
   var $$appEventBus: any;
   var $$appUIEventBus: any;

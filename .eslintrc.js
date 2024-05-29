@@ -56,6 +56,14 @@ const restrictedImportsPatterns = [
     message:
       'import localDbInstance directly is not allowd, use localDb instead',
   },
+  {
+    group: [
+      '**/v4ToV5Migration',
+      'v4ToV5Migration/**',
+      '**/v4ToV5Migration/**',
+    ],
+    message: 'import **/v4ToV5Migration/** not allowed ',
+  },
 ];
 const tsRules = {
   '@typescript-eslint/no-restricted-imports': [

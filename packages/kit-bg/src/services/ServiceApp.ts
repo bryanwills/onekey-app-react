@@ -15,6 +15,8 @@ import type { IOpenUrlRouteInfo } from '@onekeyhq/shared/src/utils/extUtils';
 import extUtils from '@onekeyhq/shared/src/utils/extUtils';
 
 import localDb from '../dbs/local/localDb';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { V4ToV5MigrationController } from '../migrations/v4ToV5Migration/V4ToV5MigrationController';
 
 import ServiceBase from './ServiceBase';
 
@@ -23,6 +25,8 @@ class ServiceApp extends ServiceBase {
   constructor({ backgroundApi }: { backgroundApi: any }) {
     super({ backgroundApi });
   }
+
+  v4ToV5MigrationCtrl = new V4ToV5MigrationController();
 
   @backgroundMethod()
   private restartApp() {
