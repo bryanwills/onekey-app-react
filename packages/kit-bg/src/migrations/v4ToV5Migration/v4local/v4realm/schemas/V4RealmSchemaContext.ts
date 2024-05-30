@@ -11,19 +11,13 @@ class V4RealmSchemaContext extends V4RealmObjectBase<IV4DBContext> {
 
   public nextHD!: number;
 
-  public nextWalletNo!: number;
-
   public verifyString!: string;
 
   public networkOrderChanged?: boolean;
 
+  // pendingWallets
+
   public backupUUID!: string;
-
-  public nextSignatureMessageId!: number;
-
-  public nextSignatureTransactionId!: number;
-
-  public nextConnectedSiteId!: number;
 
   public static override schema: Realm.ObjectSchema = {
     name: EV4LocalDBStoreNames.Context,
@@ -31,13 +25,9 @@ class V4RealmSchemaContext extends V4RealmObjectBase<IV4DBContext> {
     properties: {
       id: 'string',
       nextHD: 'int',
-      nextWalletNo: 'int',
       verifyString: 'string',
       networkOrderChanged: { type: 'bool', default: false },
       backupUUID: { type: 'string', default: '' },
-      nextSignatureMessageId: { type: 'int', default: 1 },
-      nextSignatureTransactionId: { type: 'int', default: 1 },
-      nextConnectedSiteId: { type: 'int', default: 1 },
     },
   };
 
@@ -45,13 +35,9 @@ class V4RealmSchemaContext extends V4RealmObjectBase<IV4DBContext> {
     return {
       id: this.id,
       nextHD: this.nextHD,
-      nextWalletNo: this.nextWalletNo,
       verifyString: this.verifyString,
       networkOrderChanged: this.networkOrderChanged || false,
       backupUUID: this.backupUUID,
-      nextSignatureMessageId: this.nextSignatureMessageId,
-      nextSignatureTransactionId: this.nextSignatureTransactionId,
-      nextConnectedSiteId: this.nextConnectedSiteId,
     };
   }
 }

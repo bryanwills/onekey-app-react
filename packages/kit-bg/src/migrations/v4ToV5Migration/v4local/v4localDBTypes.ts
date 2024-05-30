@@ -79,13 +79,9 @@ export type IV4DBWallet = IV4DBBaseObjectWithName & {
 export type IV4DBContext = {
   id: string; // DB_MAIN_CONTEXT_ID
   nextHD: number;
-  nextWalletNo: number;
   verifyString: string;
   networkOrderChanged?: boolean;
   backupUUID: string;
-  nextSignatureMessageId: number;
-  nextSignatureTransactionId: number;
-  nextConnectedSiteId: number;
 };
 
 export type IV4DBDevice = IV4DBBaseObjectWithName & {
