@@ -37,6 +37,7 @@ declare global {
   var $$simpleDb: any;
   var $$simpleDbV4: any;
   var $$localDb: LocalDbBase;
+  var $$localDbV4: any;
   var $$appEventBus: any;
   var $$appUIEventBus: any;
   var $$appStore: EnhancedStore;

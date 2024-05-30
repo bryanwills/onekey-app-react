@@ -3,8 +3,8 @@ import { isNil, isNumber } from 'lodash';
 import errorUtils from '@onekeyhq/shared/src/errors/utils/errorUtils';
 import { noopObject } from '@onekeyhq/shared/src/utils/miscUtils';
 
-import { LocalDbAgentBase } from '../LocalDbAgentBase';
-import { ALL_LOCAL_DB_STORE_NAMES } from '../v4localDBConsts';
+import { V4LocalDbAgentBase } from '../V4LocalDbAgentBase';
+import { V4_ALL_LOCAL_DB_STORE_NAMES } from '../v4localDBConsts';
 import { EV4LocalDBStoreNames } from '../v4localDBStoreNames';
 
 import type { IV4LocalDBAgent } from '../IV4LocalDBAgent';
@@ -35,8 +35,8 @@ import type {
 } from '../v4localDBTypes';
 import type { IDBPDatabase, IDBPObjectStore, IDBPTransaction } from 'idb';
 
-export class IndexedDBAgent
-  extends LocalDbAgentBase
+export class V4IndexedDBAgent
+  extends V4LocalDbAgentBase
   implements IV4LocalDBAgent
 {
   constructor(indexed: IDBPDatabase<IIndexedDBSchemaMap>) {
@@ -97,7 +97,7 @@ export class IndexedDBAgent
     alwaysCreate: boolean;
   }) {
     if (!this.txPair || alwaysCreate) {
-      const dbTx = db.transaction(ALL_LOCAL_DB_STORE_NAMES, 'readwrite');
+      const dbTx = db.transaction(V4_ALL_LOCAL_DB_STORE_NAMES, 'readwrite');
 
       const contextStore = this._getOrCreateObjectStore(
         dbTx,

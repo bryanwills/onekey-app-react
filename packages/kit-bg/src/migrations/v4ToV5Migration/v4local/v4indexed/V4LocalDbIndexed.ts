@@ -10,27 +10,29 @@ import {
 } from '@onekeyhq/shared/src/consts/dbConsts';
 import { generateUUID } from '@onekeyhq/shared/src/utils/miscUtils';
 
-import { V4LocalDbBaseContainer } from '../V4LocalDbBaseContainer';
-import { V4_INDEXED_DB_NAME, V4_INDEXED_DB_VERSION } from '../v4localDBConsts';
+import { V4LocalDbBase } from '../V4LocalDbBase';
+import {
+  V4_INDEXED_DB_NAME,
+  V4_INDEXED_DB_VERSION,
+  v4storeNameSupportCreatedAt,
+} from '../v4localDBConsts';
 import { EV4LocalDBStoreNames } from '../v4localDBStoreNames';
 
-import { IndexedDBAgent } from './IndexedDBAgent';
+import { V4IndexedDBAgent } from './V4IndexedDBAgent';
 
-import type { IAvatarInfo } from '../../v4types';
 import type {
   IDBWalletIdSingleton,
   IIndexedDBSchemaMap,
-  IV4DBWallet,
 } from '../v4localDBTypes';
 import type { IDBPDatabase, IDBPObjectStore, IDBPTransaction } from 'idb';
 
-export abstract class LocalDbIndexedBase extends V4LocalDbBaseContainer {
+export class V4LocalDbIndexed extends V4LocalDbBase {
   constructor() {
     super();
     this.readyDb = this._openDb();
   }
 
-  protected override readyDb: Promise<IndexedDBAgent>;
+  protected override readyDb: Promise<V4IndexedDBAgent>;
 
   async reset(): Promise<void> {
     return this.deleteIndexedDb();
@@ -90,7 +92,7 @@ export abstract class LocalDbIndexedBase extends V4LocalDbBaseContainer {
 
     // add initial records to store
 
-    const db = new IndexedDBAgent(indexed);
+    const db = new V4IndexedDBAgent(indexed);
     await this._initDBRecords(db);
     return db;
   }
@@ -115,44 +117,7 @@ export abstract class LocalDbIndexedBase extends V4LocalDbBaseContainer {
     );
   }
 
-  buildSingletonWalletRecord({ walletId }: { walletId: IDBWalletIdSingleton }) {
-    const walletConfig: Record<
-      IDBWalletIdSingleton,
-      {
-        avatar: IAvatarInfo;
-        walletNo: number;
-      }
-    > = {
-      [WALLET_TYPE_IMPORTED]: {
-        avatar: {},
-        walletNo: 100_000_1,
-      },
-      [WALLET_TYPE_WATCHING]: {
-        avatar: {},
-        walletNo: 100_000_2,
-      },
-      [WALLET_TYPE_EXTERNAL]: {
-        avatar: {},
-        walletNo: 100_000_3,
-      },
-    };
-    const record: IV4DBWallet = {
-      id: walletId,
-      avatar: walletConfig?.[walletId]?.avatar
-        ? JSON.stringify(walletConfig[walletId].avatar)
-        : undefined,
-      name: walletId,
-      type: walletId,
-      backuped: true,
-      accounts: [],
-      nextIndex: 0,
-      walletNo: walletConfig?.[walletId]?.walletNo ?? 0,
-      nextAccountIds: { 'global': 1 },
-    };
-    return record;
-  }
-
-  private async _initDBRecords(db: IndexedDBAgent) {
+  private async _initDBRecords(db: V4IndexedDBAgent) {
     const { tx } = db._buildTransactionAndStores({
       db: db.indexed,
       alwaysCreate: true,
@@ -220,12 +185,8 @@ export abstract class LocalDbIndexedBase extends V4LocalDbBaseContainer {
         keyPath: 'id',
       });
       const store = this._getObjectStoreAtVersionChange(tx, storeName);
-      const storeNameSupportCreatedAt: EV4LocalDBStoreNames[] = [
-        // ELocalDBStoreNames.SignedMessage,
-        // ELocalDBStoreNames.SignedTransaction,
-        // ELocalDBStoreNames.ConnectedSite,
-      ];
-      if (storeNameSupportCreatedAt.includes(storeName)) {
+
+      if (v4storeNameSupportCreatedAt.includes(storeName)) {
         // @ts-ignore
         store.createIndex('createdAt', 'createdAt', {
           unique: true,

@@ -22,7 +22,7 @@ import type {
   ILocalDBWithTransactionTask,
 } from './v4localDBTypes';
 
-export abstract class LocalDbAgentBase implements IV4LocalDBAgent {
+export abstract class V4LocalDbAgentBase implements IV4LocalDBAgent {
   async buildRecordPairsFromIds<T extends EV4LocalDBStoreNames>({
     recordPairs,
     ids,
