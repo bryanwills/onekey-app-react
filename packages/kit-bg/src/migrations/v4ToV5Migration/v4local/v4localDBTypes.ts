@@ -88,17 +88,16 @@ export type IV4DBDevice = IV4DBBaseObjectWithName & {
   features: string; // TODO rename to featuresRaw
   //   featuresInfo?: IOneKeyDeviceFeatures; // readonly field // TODO rename to features
   // TODO make index for better performance (getDeviceByQuery)
-  connectId: string; // alias mac\sn, never changed even if device reset
+  mac: string; // alias connectId/mac\sn, never changed even if device reset
   name: string;
   // TODO make index for better performance (getDeviceByQuery)
   uuid: string;
   deviceId: string; // features.device_id changed after device reset
   deviceType: IDeviceType;
-  settingsRaw: string;
+  payloadJson: string; // settingsRaw
   //   settings?: IDBDeviceSettings;
   createdAt: number;
   updatedAt: number;
-  verifiedAtVersion?: string;
 };
 
 export type IV4DBCredentialBase = {

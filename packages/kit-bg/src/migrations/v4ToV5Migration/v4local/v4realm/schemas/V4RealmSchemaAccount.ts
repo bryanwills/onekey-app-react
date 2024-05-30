@@ -89,8 +89,8 @@ class V4RealmSchemaAccount extends V4RealmObjectBase<IV4DBAccount> {
     if (this.type === EV4DBAccountType.SIMPLE) {
       (ret as IV4DBSimpleAccount).pub = this.pub || '';
     } else if (this.type === EV4DBAccountType.VARIANT) {
-      ret.pub = this.pub || '';
-      ret.addresses = this.addresses || {};
+      (ret as IV4DBVariantAccount).pub = this.pub || '';
+      (ret as IV4DBVariantAccount).addresses = this.addresses || {};
     } else if (this.type === EV4DBAccountType.UTXO) {
       (ret as IV4DBUtxoAccount).pub = this.pub || '';
       (ret as IV4DBUtxoAccount).xpub = this.xpub || '';

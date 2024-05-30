@@ -24,7 +24,7 @@ class V4RealmSchemaDevice extends V4RealmObjectBase<IV4DBDevice> {
   /**
    * ble connectId address (mac)
    */
-  public connectId!: string;
+  public mac!: string;
 
   /**
    * device uuid
@@ -44,7 +44,8 @@ class V4RealmSchemaDevice extends V4RealmObjectBase<IV4DBDevice> {
   /**
    * device config
    */
-  public settingsRaw!: string;
+  // public settingsRaw!: string;
+  public payloadJson!: string;
 
   /**
    * timestamp of the device bonded with the host device.
@@ -56,23 +57,20 @@ class V4RealmSchemaDevice extends V4RealmObjectBase<IV4DBDevice> {
    */
   public updatedAt!: number;
 
-  public verifiedAtVersion?: string;
-
   public static override schema: Realm.ObjectSchema = {
     name: EV4LocalDBStoreNames.Device,
     primaryKey: 'id',
     properties: {
       id: 'string',
       name: 'string',
-      connectId: 'string',
+      mac: 'string', // connectId
       uuid: 'string',
       deviceId: 'string',
       deviceType: 'string',
-      settingsRaw: 'string',
       features: 'string',
+      payloadJson: 'string', // settingsRaw
       createdAt: 'int',
       updatedAt: 'int',
-      verifiedAtVersion: 'string?',
     },
   };
 
@@ -81,15 +79,14 @@ class V4RealmSchemaDevice extends V4RealmObjectBase<IV4DBDevice> {
     return {
       id: this.id,
       name: this.name,
-      connectId: this.connectId,
+      mac: this.mac, // connectId
       uuid: this.uuid,
       deviceId: this.deviceId,
       deviceType: this.deviceType,
       features: this.features,
-      settingsRaw: this.settingsRaw,
+      payloadJson: this.payloadJson, // settingsRaw
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      verifiedAtVersion: this.verifiedAtVersion,
     };
   }
 }
