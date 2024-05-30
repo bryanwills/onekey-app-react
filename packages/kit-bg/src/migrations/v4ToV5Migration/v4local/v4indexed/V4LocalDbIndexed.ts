@@ -65,7 +65,8 @@ export class V4LocalDbIndexed extends V4LocalDbBase {
     // delete removed stores
     const storeNamesToRemove = difference(currentStoreNames, storeNamesToAdd);
     for (const name of storeNamesToRemove) {
-      db.deleteObjectStore(name);
+      // removeObjectStore / removeTable
+      // db.deleteObjectStore(name);
     }
 
     return null;
@@ -130,12 +131,8 @@ export class V4LocalDbIndexed extends V4LocalDbBase {
       this._getOrAddRecord(contextStore, {
         id: DB_MAIN_CONTEXT_ID,
         nextHD: 1,
-        nextWalletNo: 1,
         verifyString: DEFAULT_VERIFY_STRING,
         backupUUID: generateUUID(),
-        nextSignatureMessageId: 1,
-        nextSignatureTransactionId: 1,
-        nextConnectedSiteId: 1,
       }),
       this._addSingletonWalletRecord({
         walletStore,

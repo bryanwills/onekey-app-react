@@ -54,7 +54,6 @@ export type IV4DBWalletType =
 export type IV4DBWallet = IV4DBBaseObjectWithName & {
   type: IV4DBWalletType;
   backuped: boolean;
-  nextIndex: number; // TODO optional, merge with nextAccountIds
   // only for singleton wallet
   accounts: string[];
   // only for singleton wallet
@@ -67,12 +66,9 @@ export type IV4DBWallet = IV4DBBaseObjectWithName & {
   avatar?: IV4DBAvatar;
   //   avatarInfo?: IAvatarInfo; // readonly field
   hiddenWallets?: IV4DBWallet[]; // readonly field
-  isTemp?: boolean;
   passphraseState?: string;
-  walletNo: number;
   walletOrder?: number;
-  xfp?: string; // qr wallet only
-  airGapAccountsInfoRaw?: string;
+  deviceType?: string;
   //   airGapAccountsInfo?: IQrWalletAirGapAccountsInfo;
 };
 

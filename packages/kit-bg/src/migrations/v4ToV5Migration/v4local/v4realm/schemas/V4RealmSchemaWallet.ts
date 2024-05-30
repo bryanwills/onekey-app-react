@@ -17,21 +17,13 @@ class V4RealmSchemaWallet extends V4RealmObjectBase<IV4DBWallet> {
 
   public accounts?: string[];
 
-  public nextIndex!: number;
-
-  public walletNo!: number;
-
   public nextAccountIds?: Realm.Dictionary<number>;
 
   public associatedDevice?: string;
 
-  public isTemp?: boolean;
+  public deviceType?: string;
 
   public passphraseState?: string;
-
-  public xfp?: string;
-
-  public airGapAccountsInfoRaw?: string;
 
   public static override schema: Realm.ObjectSchema = {
     name: EV4LocalDBStoreNames.Wallet,
@@ -42,19 +34,16 @@ class V4RealmSchemaWallet extends V4RealmObjectBase<IV4DBWallet> {
       avatar: 'string?',
       type: 'string',
       backuped: { type: 'bool', default: false },
+      // accounts: { type: 'Account<>', default: [] },
       accounts: 'string?[]',
-      nextIndex: { type: 'int', default: 0 },
-      walletNo: 'int',
       nextAccountIds: {
         type: 'dictionary',
         default: {},
         objectType: 'int',
       },
       associatedDevice: 'string?',
-      isTemp: { type: 'bool', default: false },
+      deviceType: 'string?',
       passphraseState: 'string?',
-      xfp: 'string?',
-      airGapAccountsInfoRaw: 'string?',
     },
   };
 
@@ -67,16 +56,12 @@ class V4RealmSchemaWallet extends V4RealmObjectBase<IV4DBWallet> {
       backuped: this.backuped || false,
       // convert RealmDB list to array
       accounts: Array.from(this.accounts || []),
-      nextIndex: this.nextIndex,
-      walletNo: this.walletNo,
       nextAccountIds: Object.fromEntries(
         Object.entries(Object(this.nextAccountIds)),
       ),
       associatedDevice: this.associatedDevice,
-      isTemp: this.isTemp,
+      deviceType: this.deviceType,
       passphraseState: this.passphraseState,
-      xfp: this.xfp,
-      airGapAccountsInfoRaw: this.airGapAccountsInfoRaw,
     };
   }
 }
