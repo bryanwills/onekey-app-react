@@ -120,15 +120,7 @@ type IV4DBAvatar = string; // stringify(IAvatarInfo)
 type IV4DBBaseAccount = IV4DBBaseObjectWithName & {
   type: EV4DBAccountType | undefined;
   path: string;
-  pathIndex?: number;
-  relPath?: string; // 0/0
-  indexedAccountId?: string;
   coinType: string;
-  impl: string; // single chain account belongs to network impl
-  // single chain account belongs to certain networks, check keyring options: onlyAvailableOnCertainNetworks
-  networks?: string[];
-  // single chain account auto change to createAtNetwork when network not compatible and networks not defined
-  createAtNetwork?: string;
   template?: string;
 };
 
@@ -153,16 +145,6 @@ export type IV4DBVariantAccount = IV4DBBaseAccount & {
 };
 export type IV4DBExternalAccount = IV4DBVariantAccount & {
   address: string; // always be empty if walletconnect account
-
-  connectionInfoRaw: string | undefined;
-
-  // TODO merge with addresses
-  connectedAddresses: {
-    [networkIdOrImpl: string]: string; // multiple address join(',')
-  };
-  selectedAddress: {
-    [networkId: string]: number;
-  };
 };
 export type IV4DBAccount =
   | IV4DBSimpleAccount

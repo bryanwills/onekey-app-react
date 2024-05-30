@@ -4,7 +4,8 @@ import { V4RealmObjectBase } from '../base/V4RealmObjectBase';
 
 import type {
   IV4DBAccount,
-  IV4DBExternalAccount,
+  // IV4DBExternalAccount,
+  IV4DBSimpleAccount,
   IV4DBUtxoAccount,
   IV4DBVariantAccount,
 } from '../../v4localDBTypes';
@@ -19,19 +20,7 @@ class V4RealmSchemaAccount extends V4RealmObjectBase<IV4DBAccount> {
 
   public path?: string;
 
-  public pathIndex?: number;
-
-  public relPath?: string;
-
-  public indexedAccountId?: string;
-
   public coinType!: string;
-
-  public impl!: string;
-
-  public networks?: string[];
-
-  public createAtNetwork?: string;
 
   public pub?: string;
 
@@ -45,13 +34,11 @@ class V4RealmSchemaAccount extends V4RealmObjectBase<IV4DBAccount> {
 
   public customAddresses?: Realm.Dictionary<string>;
 
-  public connectedAddresses?: Realm.Dictionary<string>;
+  // public tokens?: Realm.Set<TokenSchema>;
 
-  public selectedAddress?: Realm.Dictionary<number>;
+  // public assignee!: Realm.Results<WalletSchema>;
 
   public template?: string;
-
-  public connectionInfoRaw?: string;
 
   public static override schema: Realm.ObjectSchema = {
     name: EV4LocalDBStoreNames.Account,
@@ -61,13 +48,7 @@ class V4RealmSchemaAccount extends V4RealmObjectBase<IV4DBAccount> {
       name: 'string',
       type: 'string',
       path: 'string?',
-      pathIndex: 'int?',
-      relPath: 'string?',
-      indexedAccountId: 'string?',
       coinType: 'string',
-      impl: 'string',
-      networks: 'string?[]',
-      createAtNetwork: 'string?',
       pub: 'string?',
       xpub: 'string?',
       xpubSegwit: 'string?',
@@ -78,17 +59,17 @@ class V4RealmSchemaAccount extends V4RealmObjectBase<IV4DBAccount> {
         default: {},
         objectType: 'string',
       },
-      connectedAddresses: {
-        type: 'dictionary',
-        default: {},
-        objectType: 'string',
-      },
-      selectedAddress: {
-        type: 'dictionary',
-        default: {},
-        objectType: 'int',
-      },
-      connectionInfoRaw: 'string?',
+      // tokens: {
+      //   // type: 'Token<>',
+      //   type: 'list',
+      //   objectType: 'TokenSchema',
+      //   default: [],
+      // },
+      // assignee: {
+      //   type: 'linkingObjects',
+      //   objectType: 'Wallet',
+      //   property: 'accounts',
+      // },
       template: 'string?',
     },
   };
@@ -99,47 +80,24 @@ class V4RealmSchemaAccount extends V4RealmObjectBase<IV4DBAccount> {
       name: this.name,
       type: this.type,
       path: this.path || '',
-      pathIndex: this.pathIndex,
-      relPath: this.relPath,
-      indexedAccountId: this.indexedAccountId,
       coinType: this.coinType,
       address: this.address || '',
       template: this.template || '',
       pub: '',
-      impl: this.impl,
-      networks: Array.from(this.networks || []),
-      createAtNetwork: this.createAtNetwork,
+      addresses: {},
     };
     if (this.type === EV4DBAccountType.SIMPLE) {
+      (ret as IV4DBSimpleAccount).pub = this.pub || '';
+    } else if (this.type === EV4DBAccountType.VARIANT) {
       ret.pub = this.pub || '';
-    }
-    if (this.type === EV4DBAccountType.VARIANT) {
-      (ret as IV4DBVariantAccount).pub = this.pub || '';
-      (ret as IV4DBVariantAccount).addresses =
-        (this.addresses?.toJSON() as any) || {};
-    }
-    if (this.type === EV4DBAccountType.UTXO) {
+      ret.addresses = this.addresses || {};
+    } else if (this.type === EV4DBAccountType.UTXO) {
       (ret as IV4DBUtxoAccount).pub = this.pub || '';
       (ret as IV4DBUtxoAccount).xpub = this.xpub || '';
       (ret as IV4DBUtxoAccount).xpubSegwit = this.xpubSegwit || '';
-      (ret as IV4DBUtxoAccount).addresses =
-        (this.addresses?.toJSON() as any) || {};
-      (ret as IV4DBUtxoAccount).customAddresses =
-        (this.customAddresses?.toJSON() as any) || {};
+      (ret as IV4DBUtxoAccount).addresses = this.addresses || {};
+      (ret as IV4DBUtxoAccount).customAddresses = this.customAddresses || {};
     }
-
-    if (this.connectedAddresses) {
-      (ret as IV4DBExternalAccount).connectedAddresses =
-        (this.connectedAddresses.toJSON() as any) || {};
-    }
-    if (this.selectedAddress) {
-      (ret as IV4DBExternalAccount).selectedAddress =
-        (this.selectedAddress.toJSON() as any) || {};
-    }
-    if (this.connectionInfoRaw) {
-      (ret as IV4DBExternalAccount).connectionInfoRaw = this.connectionInfoRaw;
-    }
-
     return ret;
   }
 }
