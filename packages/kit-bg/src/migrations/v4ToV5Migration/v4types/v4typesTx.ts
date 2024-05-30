@@ -1,3 +1,5 @@
+import type { IEmojiTypes } from '@onekeyhq/shared/src/utils/emojiUtils';
+
 import type { IV4FeeInfoUnit } from './v4typesFee';
 import type { IV4Token } from './v4typesToken';
 
@@ -257,4 +259,9 @@ export type IV4DecodedTx = {
   payload?: unknown;
 
   tokenIdOnNetwork?: string; // indicates this tx belongs to which token
+};
+
+export type IAvatarInfo = {
+  emoji?: IEmojiTypes | 'img';
+  bgColor?: string;
 };

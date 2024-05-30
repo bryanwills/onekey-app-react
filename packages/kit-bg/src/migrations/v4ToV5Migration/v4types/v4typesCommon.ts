@@ -46,3 +46,11 @@ export type IV4WalletSwitchItem = {
 //   firmware?: SYSFirmwareInfo;
 //   ble?: BLEFirmwareInfo;
 // };
+
+export enum EV4DBAccountType {
+  SIMPLE = 'simple',
+  UTXO = 'utxo',
+  VARIANT = 'variant',
+  // used for allNetworks
+  FAKE = 'FAKE',
+}

@@ -64,6 +64,11 @@ const restrictedImportsPatterns = [
     ],
     message: 'import **/v4ToV5Migration/** not allowed ',
   },
+  {
+    group: ['**/v4localDBStoreNames.native'],
+    message: 'import v4localDBStoreNames instead ',
+  },
+  //
 ];
 const tsRules = {
   '@typescript-eslint/no-restricted-imports': [
