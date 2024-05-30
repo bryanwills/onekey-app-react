@@ -11,26 +11,26 @@ import type { V4RealmObjectBase } from './base/V4RealmObjectBase';
 import type { IV4LocalDBAgent } from '../IV4LocalDBAgent';
 import type { EV4LocalDBStoreNames } from '../v4localDBStoreNames';
 import type {
-  ILocalDBGetAllRecordsParams,
-  ILocalDBGetAllRecordsResult,
-  ILocalDBGetRecordByIdParams,
-  ILocalDBGetRecordByIdResult,
-  ILocalDBGetRecordsCountParams,
-  ILocalDBGetRecordsCountResult,
-  ILocalDBRecord,
-  ILocalDBRecordPair,
-  ILocalDBTxAddRecordsParams,
-  ILocalDBTxAddRecordsResult,
-  ILocalDBTxGetAllRecordsParams,
-  ILocalDBTxGetAllRecordsResult,
-  ILocalDBTxGetRecordByIdParams,
-  ILocalDBTxGetRecordByIdResult,
-  ILocalDBTxGetRecordsCountParams,
-  ILocalDBTxRemoveRecordsParams,
-  ILocalDBTxUpdateRecordsParams,
-  ILocalDBWithTransactionOptions,
-  ILocalDBWithTransactionTask,
-  IRealmDBSchemaMap,
+  IV4LocalDBGetAllRecordsParams,
+  IV4LocalDBGetAllRecordsResult,
+  IV4LocalDBGetRecordByIdParams,
+  IV4LocalDBGetRecordByIdResult,
+  IV4LocalDBGetRecordsCountParams,
+  IV4LocalDBGetRecordsCountResult,
+  IV4LocalDBRecord,
+  IV4LocalDBRecordPair,
+  IV4LocalDBTxAddRecordsParams,
+  IV4LocalDBTxAddRecordsResult,
+  IV4LocalDBTxGetAllRecordsParams,
+  IV4LocalDBTxGetAllRecordsResult,
+  IV4LocalDBTxGetRecordByIdParams,
+  IV4LocalDBTxGetRecordByIdResult,
+  IV4LocalDBTxGetRecordsCountParams,
+  IV4LocalDBTxRemoveRecordsParams,
+  IV4LocalDBTxUpdateRecordsParams,
+  IV4LocalDBWithTransactionOptions,
+  IV4LocalDBWithTransactionTask,
+  IV4RealmDBSchemaMap,
 } from '../v4localDBTypes';
 import type Realm from 'realm';
 
@@ -62,7 +62,7 @@ export class V4RealmDBAgent
   ) {
     checkIsDefined(storeName);
     console.log('realmdb _getObjectRecordById ', { storeName, recordId });
-    const object = this.realm.objectForPrimaryKey<IRealmDBSchemaMap[T]>(
+    const object = this.realm.objectForPrimaryKey<IV4RealmDBSchemaMap[T]>(
       storeName,
       recordId as any,
     );
@@ -72,7 +72,9 @@ export class V4RealmDBAgent
 
   _getOrAddObjectRecord<T extends EV4LocalDBStoreNames>(
     storeName: T,
-    record: IRealmDBSchemaMap[T] extends V4RealmObjectBase<infer U> ? U : never,
+    record: IV4RealmDBSchemaMap[T] extends V4RealmObjectBase<infer U>
+      ? U
+      : never,
   ) {
     // @ts-ignore
     const recordId = record?.id;
@@ -88,8 +90,8 @@ export class V4RealmDBAgent
   // ----------------------------------------------
 
   async withTransaction<T>(
-    task: ILocalDBWithTransactionTask<T>,
-    options?: ILocalDBWithTransactionOptions,
+    task: IV4LocalDBWithTransactionTask<T>,
+    options?: IV4LocalDBWithTransactionOptions,
   ): Promise<T> {
     if (!options?.readOnly) {
       this.realm.beginTransaction();
@@ -110,8 +112,8 @@ export class V4RealmDBAgent
   }
 
   async getRecordsCount<T extends EV4LocalDBStoreNames>(
-    params: ILocalDBGetRecordsCountParams<T>,
-  ): Promise<ILocalDBGetRecordsCountResult> {
+    params: IV4LocalDBGetRecordsCountParams<T>,
+  ): Promise<IV4LocalDBGetRecordsCountResult> {
     return this.withTransaction(
       async (tx) => {
         const { count } = await this.txGetRecordsCount({ ...params, tx });
@@ -122,8 +124,8 @@ export class V4RealmDBAgent
   }
 
   async getAllRecords<T extends EV4LocalDBStoreNames>(
-    params: ILocalDBGetAllRecordsParams<T>,
-  ): Promise<ILocalDBGetAllRecordsResult<T>> {
+    params: IV4LocalDBGetAllRecordsParams<T>,
+  ): Promise<IV4LocalDBGetAllRecordsResult<T>> {
     return this.withTransaction(
       async (tx) => {
         const { records } = await this.txGetAllRecords({ ...params, tx });
@@ -134,8 +136,8 @@ export class V4RealmDBAgent
   }
 
   async getRecordById<T extends EV4LocalDBStoreNames>(
-    params: ILocalDBGetRecordByIdParams<T>,
-  ): Promise<ILocalDBGetRecordByIdResult<T>> {
+    params: IV4LocalDBGetRecordByIdParams<T>,
+  ): Promise<IV4LocalDBGetRecordByIdResult<T>> {
     return this.withTransaction(
       async (tx) => {
         const [record] = await this.txGetRecordById({ ...params, tx });
@@ -146,18 +148,18 @@ export class V4RealmDBAgent
   }
 
   async txGetRecordsCount<T extends EV4LocalDBStoreNames>(
-    params: ILocalDBTxGetRecordsCountParams<T>,
-  ): Promise<ILocalDBGetRecordsCountResult> {
+    params: IV4LocalDBTxGetRecordsCountParams<T>,
+  ): Promise<IV4LocalDBGetRecordsCountResult> {
     const { name } = params;
-    const objList = this.realm.objects<IRealmDBSchemaMap[T]>(name);
+    const objList = this.realm.objects<IV4RealmDBSchemaMap[T]>(name);
     return Promise.resolve({
       count: objList.length,
     });
   }
 
   async txGetAllRecords<T extends EV4LocalDBStoreNames>(
-    params: ILocalDBTxGetAllRecordsParams<T>,
-  ): Promise<ILocalDBTxGetAllRecordsResult<T>> {
+    params: IV4LocalDBTxGetAllRecordsParams<T>,
+  ): Promise<IV4LocalDBTxGetAllRecordsResult<T>> {
     const { name, ids, limit, offset } = params;
     let objList: Array<{ record: any } | null | undefined> = [];
 
@@ -166,7 +168,7 @@ export class V4RealmDBAgent
     } else {
       const isSlice = isNumber(limit) && isNumber(offset);
       const hasCreatedAtIndex = v4storeNameSupportCreatedAt.includes(name);
-      let items = this.realm.objects<IRealmDBSchemaMap[T]>(name);
+      let items = this.realm.objects<IV4RealmDBSchemaMap[T]>(name);
       if (isSlice && hasCreatedAtIndex) {
         items = items
           .sorted('createdAt', true)
@@ -175,8 +177,8 @@ export class V4RealmDBAgent
       objList = items as any;
     }
 
-    const recordPairs: ILocalDBRecordPair<T>[] = [];
-    const records: ILocalDBRecord<T>[] = [];
+    const recordPairs: IV4LocalDBRecordPair<T>[] = [];
+    const records: IV4LocalDBRecord<T>[] = [];
     objList.forEach((obj) => {
       recordPairs.push([obj ? obj.record : null, obj as any]);
       records.push(obj ? obj.record : null);
@@ -189,8 +191,8 @@ export class V4RealmDBAgent
   }
 
   async txGetRecordById<T extends EV4LocalDBStoreNames>(
-    params: ILocalDBTxGetRecordByIdParams<T>,
-  ): Promise<ILocalDBTxGetRecordByIdResult<T>> {
+    params: IV4LocalDBTxGetRecordByIdParams<T>,
+  ): Promise<IV4LocalDBTxGetRecordByIdResult<T>> {
     const { id, name } = params;
     const obj = this._getObjectRecordById(name, id);
     // @ts-ignore
@@ -203,7 +205,7 @@ export class V4RealmDBAgent
   }
 
   async txUpdateRecords<T extends EV4LocalDBStoreNames>(
-    params: ILocalDBTxUpdateRecordsParams<T>,
+    params: IV4LocalDBTxUpdateRecordsParams<T>,
   ): Promise<void> {
     const { tx, updater } = params;
     checkIsDefined(tx);
@@ -235,8 +237,8 @@ export class V4RealmDBAgent
   }
 
   async txAddRecords<T extends EV4LocalDBStoreNames>(
-    params: ILocalDBTxAddRecordsParams<T>,
-  ): Promise<ILocalDBTxAddRecordsResult> {
+    params: IV4LocalDBTxAddRecordsParams<T>,
+  ): Promise<IV4LocalDBTxAddRecordsResult> {
     const { name, records, skipIfExists } = params;
     checkIsDefined(params.tx);
     checkIsDefined(params.name);
@@ -246,7 +248,7 @@ export class V4RealmDBAgent
       record: records?.[0] || {},
     });
 
-    const result: ILocalDBTxAddRecordsResult = {
+    const result: IV4LocalDBTxAddRecordsResult = {
       added: 0,
       skipped: 0,
       addedIds: [],
@@ -271,7 +273,7 @@ export class V4RealmDBAgent
   }
 
   async txRemoveRecords<T extends EV4LocalDBStoreNames>(
-    params: ILocalDBTxRemoveRecordsParams<T>,
+    params: IV4LocalDBTxRemoveRecordsParams<T>,
   ): Promise<void> {
     checkIsDefined(params.tx);
     const pairs = await this.buildRecordPairsFromIds(params);

@@ -21,7 +21,7 @@ import { EV4LocalDBStoreNames } from '../v4localDBStoreNames';
 import { v4realmDBSchemas } from './schemas';
 import { V4RealmDBAgent } from './V4RealmDBAgent';
 
-import type { IDBWalletIdSingleton } from '../v4localDBTypes';
+import type { IV4DBWalletIdSingleton } from '../v4localDBTypes';
 
 export class V4LocalDbRealm extends V4LocalDbBase {
   protected override readyDb: Promise<V4RealmDBAgent>;
@@ -94,7 +94,7 @@ export class V4LocalDbRealm extends V4LocalDbBase {
     walletId,
   }: {
     db: V4RealmDBAgent;
-    walletId: IDBWalletIdSingleton;
+    walletId: IV4DBWalletIdSingleton;
   }) {
     db._getOrAddObjectRecord(
       EV4LocalDBStoreNames.Wallet,

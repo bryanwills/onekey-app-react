@@ -4,7 +4,7 @@ import { V4RealmObjectBase } from '../base/V4RealmObjectBase';
 import type { IV4DBWallet, IV4DBWalletType } from '../../v4localDBTypes';
 import type Realm from 'realm';
 
-class RealmSchemaWallet extends V4RealmObjectBase<IV4DBWallet> {
+class V4RealmSchemaWallet extends V4RealmObjectBase<IV4DBWallet> {
   public id!: string;
 
   public name!: string;
@@ -81,4 +81,4 @@ class RealmSchemaWallet extends V4RealmObjectBase<IV4DBWallet> {
   }
 }
 
-export { RealmSchemaWallet as V4RealmSchemaWallet };
+export { V4RealmSchemaWallet };

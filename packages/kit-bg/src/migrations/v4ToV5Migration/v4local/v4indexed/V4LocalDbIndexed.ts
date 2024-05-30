@@ -21,8 +21,8 @@ import { EV4LocalDBStoreNames } from '../v4localDBStoreNames';
 import { V4IndexedDBAgent } from './V4IndexedDBAgent';
 
 import type {
-  IDBWalletIdSingleton,
-  IIndexedDBSchemaMap,
+  IV4DBWalletIdSingleton,
+  IV4IndexedDBSchemaMap,
 } from '../v4localDBTypes';
 import type { IDBPDatabase, IDBPObjectStore, IDBPTransaction } from 'idb';
 
@@ -42,11 +42,11 @@ export class V4LocalDbIndexed extends V4LocalDbBase {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private async _handleDbUpgrade(options: {
-    db: IDBPDatabase<IIndexedDBSchemaMap>;
+    db: IDBPDatabase<IV4IndexedDBSchemaMap>;
     oldVersion: number;
     newVersion: number | null;
     transaction: IDBPTransaction<
-      IIndexedDBSchemaMap,
+      IV4IndexedDBSchemaMap,
       EV4LocalDBStoreNames[],
       'versionchange'
     >;
@@ -74,7 +74,7 @@ export class V4LocalDbIndexed extends V4LocalDbBase {
   private async _openDb() {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
-    const indexed = await openDB<IIndexedDBSchemaMap>(
+    const indexed = await openDB<IV4IndexedDBSchemaMap>(
       V4_INDEXED_DB_NAME,
       V4_INDEXED_DB_VERSION,
       {
@@ -102,12 +102,12 @@ export class V4LocalDbIndexed extends V4LocalDbBase {
     walletId,
   }: {
     walletStore: IDBPObjectStore<
-      IIndexedDBSchemaMap,
+      IV4IndexedDBSchemaMap,
       EV4LocalDBStoreNames.Wallet[],
       EV4LocalDBStoreNames.Wallet,
       'readwrite'
     >;
-    walletId: IDBWalletIdSingleton;
+    walletId: IV4DBWalletIdSingleton;
   }) {
     await this._getOrAddRecord(
       walletStore,
@@ -154,12 +154,12 @@ export class V4LocalDbIndexed extends V4LocalDbBase {
 
   private _getObjectStoreAtVersionChange<T extends EV4LocalDBStoreNames>(
     tx: IDBPTransaction<
-      IIndexedDBSchemaMap,
+      IV4IndexedDBSchemaMap,
       EV4LocalDBStoreNames[],
       'versionchange'
     >,
     storeName: T,
-  ): IDBPObjectStore<IIndexedDBSchemaMap, T[], T, 'versionchange'> {
+  ): IDBPObjectStore<IV4IndexedDBSchemaMap, T[], T, 'versionchange'> {
     const store = tx.objectStore(storeName);
     // @ts-ignore
     return store;
@@ -168,14 +168,14 @@ export class V4LocalDbIndexed extends V4LocalDbBase {
   private _getOrCreateObjectStoreAtVersionChange<
     T extends EV4LocalDBStoreNames,
   >(
-    db: IDBPDatabase<IIndexedDBSchemaMap>,
+    db: IDBPDatabase<IV4IndexedDBSchemaMap>,
     tx: IDBPTransaction<
-      IIndexedDBSchemaMap,
+      IV4IndexedDBSchemaMap,
       EV4LocalDBStoreNames[],
       'versionchange'
     >,
     storeName: T,
-  ): IDBPObjectStore<IIndexedDBSchemaMap, T[], T, 'versionchange'> {
+  ): IDBPObjectStore<IV4IndexedDBSchemaMap, T[], T, 'versionchange'> {
     try {
       const store = this._getObjectStoreAtVersionChange(tx, storeName);
       // const dd = await store.get('');
@@ -197,9 +197,9 @@ export class V4LocalDbIndexed extends V4LocalDbBase {
   }
 
   private async _getOrAddRecord<T extends EV4LocalDBStoreNames>(
-    store: IDBPObjectStore<IIndexedDBSchemaMap, T[], T, 'readwrite'>,
-    record: IIndexedDBSchemaMap[T]['value'],
-  ): Promise<IIndexedDBSchemaMap[T]['value'] | undefined> {
+    store: IDBPObjectStore<IV4IndexedDBSchemaMap, T[], T, 'readwrite'>,
+    record: IV4IndexedDBSchemaMap[T]['value'],
+  ): Promise<IV4IndexedDBSchemaMap[T]['value'] | undefined> {
     /* get store like this
     const store = this._getOrCreateObjectStore(
       db,

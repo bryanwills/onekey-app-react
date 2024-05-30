@@ -6,7 +6,7 @@ import { V4RealmObjectBase } from '../base/V4RealmObjectBase';
 import type { IV4DBContext } from '../../v4localDBTypes';
 import type Realm from 'realm';
 
-class RealmSchemaContext extends V4RealmObjectBase<IV4DBContext> {
+class V4RealmSchemaContext extends V4RealmObjectBase<IV4DBContext> {
   public id!: string;
 
   public nextHD!: number;
@@ -55,4 +55,4 @@ class RealmSchemaContext extends V4RealmObjectBase<IV4DBContext> {
     };
   }
 }
-export { RealmSchemaContext as V4RealmSchemaContext };
+export { V4RealmSchemaContext };

@@ -5,7 +5,7 @@ import type { IV4DBDevice } from '../../v4localDBTypes';
 import type { IDeviceType } from '@onekeyfe/hd-core';
 import type Realm from 'realm';
 
-class RealmSchemaDevice extends V4RealmObjectBase<IV4DBDevice> {
+class V4RealmSchemaDevice extends V4RealmObjectBase<IV4DBDevice> {
   /**
    * The device's unique identifier.
    */
@@ -94,4 +94,4 @@ class RealmSchemaDevice extends V4RealmObjectBase<IV4DBDevice> {
   }
 }
 
-export { RealmSchemaDevice as V4RealmSchemaDevice };
+export { V4RealmSchemaDevice };

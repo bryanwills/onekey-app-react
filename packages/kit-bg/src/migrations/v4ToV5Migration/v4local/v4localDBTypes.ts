@@ -18,25 +18,26 @@ import type { EV4DBAccountType } from '../v4types';
 import type { IDeviceType } from '@onekeyfe/hd-core';
 import type { DBSchema, IDBPObjectStore } from 'idb';
 
-export type IDBWalletId =
+export type IV4DBWalletId =
   | string // hd-xxx, hw-xxx
   | typeof WALLET_TYPE_IMPORTED
   | typeof WALLET_TYPE_WATCHING
   | typeof WALLET_TYPE_EXTERNAL;
-export type IDBWalletIdSingleton =
+
+export type IV4DBWalletIdSingleton =
   | typeof WALLET_TYPE_IMPORTED
   | typeof WALLET_TYPE_WATCHING
   | typeof WALLET_TYPE_EXTERNAL;
 
-type IDBBaseObject = {
+type IV4DBBaseObject = {
   id: string;
 };
 
-type IDBBaseObjectWithName = IDBBaseObject & {
+type IV4DBBaseObjectWithName = IV4DBBaseObject & {
   name: string;
 };
 
-export type IV4DBAccountDerivation = IDBBaseObject & {
+export type IV4DBAccountDerivation = IV4DBBaseObject & {
   walletId: string;
   accounts: string[];
   template: string;
@@ -49,7 +50,8 @@ export type IV4DBWalletType =
   | typeof WALLET_TYPE_IMPORTED
   | typeof WALLET_TYPE_WATCHING
   | typeof WALLET_TYPE_EXTERNAL;
-export type IV4DBWallet = IDBBaseObjectWithName & {
+
+export type IV4DBWallet = IV4DBBaseObjectWithName & {
   type: IV4DBWalletType;
   backuped: boolean;
   nextIndex: number; // TODO optional, merge with nextAccountIds
@@ -62,7 +64,7 @@ export type IV4DBWallet = IDBBaseObjectWithName & {
     [template: string]: number; // hd
   };
   associatedDevice?: string; // alias to `dbDeviceId`
-  avatar?: IDBAvatar;
+  avatar?: IV4DBAvatar;
   //   avatarInfo?: IAvatarInfo; // readonly field
   hiddenWallets?: IV4DBWallet[]; // readonly field
   isTemp?: boolean;
@@ -86,7 +88,7 @@ export type IV4DBContext = {
   nextConnectedSiteId: number;
 };
 
-export type IV4DBDevice = IDBBaseObjectWithName & {
+export type IV4DBDevice = IV4DBBaseObjectWithName & {
   features: string; // TODO rename to featuresRaw
   //   featuresInfo?: IOneKeyDeviceFeatures; // readonly field // TODO rename to features
   // TODO make index for better performance (getDeviceByQuery)
@@ -109,13 +111,13 @@ export type IV4DBCredentialBase = {
   credential: string;
 };
 
-type IDBAvatar = string; // stringify(IAvatarInfo)
+type IV4DBAvatar = string; // stringify(IAvatarInfo)
 // IAvatar;
 //  type IDBAvatar = {
 //   emoji: string | 'img'; // lazy load EmojiTypes
 //   bgColor: string;
 // };
-type IDBBaseAccount = IDBBaseObjectWithName & {
+type IV4DBBaseAccount = IV4DBBaseObjectWithName & {
   type: EV4DBAccountType | undefined;
   path: string;
   pathIndex?: number;
@@ -130,11 +132,11 @@ type IDBBaseAccount = IDBBaseObjectWithName & {
   template?: string;
 };
 
-export type IV4DBSimpleAccount = IDBBaseAccount & {
+export type IV4DBSimpleAccount = IV4DBBaseAccount & {
   pub: string;
   address: string;
 };
-export type IV4DBUtxoAccount = IDBBaseAccount & {
+export type IV4DBUtxoAccount = IV4DBBaseAccount & {
   pub?: string; // TODO rename pubKey to pub
   xpub: string;
   xpubSegwit?: string; // wrap regular xpub into bitcoind native descriptor
@@ -142,15 +144,12 @@ export type IV4DBUtxoAccount = IDBBaseAccount & {
   addresses: Record<string, string>;
   customAddresses?: Record<string, string>; // for btc dynamic custom address
 };
-export type IV4DBVariantAccount = IDBBaseAccount & {
+export type IV4DBVariantAccount = IV4DBBaseAccount & {
   pub: string;
   address: string; // Base address
   // VARIANT: networkId -> address
   // UTXO: relPath -> address
   addresses: Record<string, string>;
-};
-type IDBAccountAddressesMap = {
-  [networkIdOrImpl: string]: string; // multiple address join(',')
 };
 export type IV4DBExternalAccount = IV4DBVariantAccount & {
   address: string; // always be empty if walletconnect account
@@ -171,7 +170,7 @@ export type IV4DBAccount =
   | IV4DBVariantAccount
   | IV4DBExternalAccount;
 
-export interface ILocalDBSchemaMap {
+export interface IV4LocalDBSchemaMap {
   [EV4LocalDBStoreNames.Context]: IV4DBContext;
   [EV4LocalDBStoreNames.Credential]: IV4DBCredentialBase;
   [EV4LocalDBStoreNames.Wallet]: IV4DBWallet;
@@ -180,7 +179,7 @@ export interface ILocalDBSchemaMap {
   [EV4LocalDBStoreNames.Device]: IV4DBDevice;
 }
 
-export interface IRealmDBSchemaMap {
+export interface IV4RealmDBSchemaMap {
   [EV4LocalDBStoreNames.Context]: V4RealmSchemaContext;
   [EV4LocalDBStoreNames.Credential]: V4RealmSchemaCredential;
   [EV4LocalDBStoreNames.Wallet]: V4RealmSchemaWallet;
@@ -189,7 +188,7 @@ export interface IRealmDBSchemaMap {
   [EV4LocalDBStoreNames.Device]: V4RealmSchemaDevice;
 }
 
-export interface IIndexedDBSchemaMap extends DBSchema {
+export interface IV4IndexedDBSchemaMap extends DBSchema {
   [EV4LocalDBStoreNames.AccountDerivation]: {
     key: string;
     value: IV4DBAccountDerivation;
@@ -217,133 +216,141 @@ export interface IIndexedDBSchemaMap extends DBSchema {
   };
 }
 
-export type ILocalDBTransactionStores = {
+export type IV4LocalDBTransactionStores = {
   [EV4LocalDBStoreNames.Context]: IDBPObjectStore<
-    IIndexedDBSchemaMap,
+    IV4IndexedDBSchemaMap,
     EV4LocalDBStoreNames.Context[],
     EV4LocalDBStoreNames.Context,
     'readwrite'
   >;
   [EV4LocalDBStoreNames.Credential]: IDBPObjectStore<
-    IIndexedDBSchemaMap,
+    IV4IndexedDBSchemaMap,
     EV4LocalDBStoreNames.Credential[],
     EV4LocalDBStoreNames.Credential,
     'readwrite'
   >;
   [EV4LocalDBStoreNames.Wallet]: IDBPObjectStore<
-    IIndexedDBSchemaMap,
+    IV4IndexedDBSchemaMap,
     EV4LocalDBStoreNames.Wallet[],
     EV4LocalDBStoreNames.Wallet,
     'readwrite'
   >;
   [EV4LocalDBStoreNames.Account]: IDBPObjectStore<
-    IIndexedDBSchemaMap,
+    IV4IndexedDBSchemaMap,
     EV4LocalDBStoreNames.Account[],
     EV4LocalDBStoreNames.Account,
     'readwrite'
   >;
 
   [EV4LocalDBStoreNames.AccountDerivation]: IDBPObjectStore<
-    IIndexedDBSchemaMap,
+    IV4IndexedDBSchemaMap,
     EV4LocalDBStoreNames.AccountDerivation[],
     EV4LocalDBStoreNames.AccountDerivation,
     'readwrite'
   >;
   [EV4LocalDBStoreNames.Device]: IDBPObjectStore<
-    IIndexedDBSchemaMap,
+    IV4IndexedDBSchemaMap,
     EV4LocalDBStoreNames.Device[],
     EV4LocalDBStoreNames.Device,
     'readwrite'
   >;
 };
-export interface ILocalDBTransaction {
-  stores?: ILocalDBTransactionStores;
+export interface IV4LocalDBTransaction {
+  stores?: IV4LocalDBTransactionStores;
 }
 export type IV4LocalDBWithTransactionTask<T> = (
-  tx: ILocalDBTransaction,
+  tx: IV4LocalDBTransaction,
 ) => Promise<T>;
 export type IV4LocalDBWithTransactionOptions = {
   readOnly?: boolean;
 };
 
 // GetRecordsCount
-export interface ILocalDBGetRecordsCountParams<T extends EV4LocalDBStoreNames> {
-  name: T;
-}
-export interface ILocalDBTxGetRecordsCountParams<
+export interface IV4LocalDBGetRecordsCountParams<
   T extends EV4LocalDBStoreNames,
 > {
-  tx: ILocalDBTransaction;
   name: T;
 }
-export interface ILocalDBGetRecordsCountResult {
+export interface IV4LocalDBTxGetRecordsCountParams<
+  T extends EV4LocalDBStoreNames,
+> {
+  tx: IV4LocalDBTransaction;
+  name: T;
+}
+export interface IV4LocalDBGetRecordsCountResult {
   count: number;
 }
 
-export type ILocalDBRecord<T extends EV4LocalDBStoreNames> =
-  ILocalDBSchemaMap[T];
+export type IV4LocalDBRecord<T extends EV4LocalDBStoreNames> =
+  IV4LocalDBSchemaMap[T];
 
-export type ILocalDBRecordPair<T extends EV4LocalDBStoreNames> = [
-  ILocalDBRecord<T>,
-  IRealmDBSchemaMap[T] | null,
+export type IV4LocalDBRecordPair<T extends EV4LocalDBStoreNames> = [
+  IV4LocalDBRecord<T>,
+  IV4RealmDBSchemaMap[T] | null,
 ];
 
 // GetRecordById
-export interface ILocalDBTxGetRecordByIdParams<T extends EV4LocalDBStoreNames> {
-  tx: ILocalDBTransaction;
+export interface IV4LocalDBTxGetRecordByIdParams<
+  T extends EV4LocalDBStoreNames,
+> {
+  tx: IV4LocalDBTransaction;
   name: T;
   id: string;
 }
-export type ILocalDBTxGetRecordByIdResult<T extends EV4LocalDBStoreNames> =
-  ILocalDBRecordPair<T>;
+export type IV4LocalDBTxGetRecordByIdResult<T extends EV4LocalDBStoreNames> =
+  IV4LocalDBRecordPair<T>;
 
-export interface ILocalDBGetRecordByIdParams<T extends EV4LocalDBStoreNames> {
+export interface IV4LocalDBGetRecordByIdParams<T extends EV4LocalDBStoreNames> {
   name: T;
   id: string;
 }
-export type ILocalDBGetRecordByIdResult<T extends EV4LocalDBStoreNames> =
-  ILocalDBRecord<T>;
+export type IV4LocalDBGetRecordByIdResult<T extends EV4LocalDBStoreNames> =
+  IV4LocalDBRecord<T>;
 
 // GetRecords
-export type ILocalDBGetRecordsQuery = {
+export type IV4LocalDBGetRecordsQuery = {
   ids?: string[];
   limit?: number;
   offset?: number;
 };
-export type ILocalDBTxGetAllRecordsParams<T extends EV4LocalDBStoreNames> = {
-  tx: ILocalDBTransaction;
+export type IV4LocalDBTxGetAllRecordsParams<T extends EV4LocalDBStoreNames> = {
+  tx: IV4LocalDBTransaction;
   name: T;
-} & ILocalDBGetRecordsQuery;
-export interface ILocalDBTxGetAllRecordsResult<T extends EV4LocalDBStoreNames> {
-  recordPairs: ILocalDBRecordPair<T>[];
-  records: ILocalDBRecord<T>[];
+} & IV4LocalDBGetRecordsQuery;
+export interface IV4LocalDBTxGetAllRecordsResult<
+  T extends EV4LocalDBStoreNames,
+> {
+  recordPairs: IV4LocalDBRecordPair<T>[];
+  records: IV4LocalDBRecord<T>[];
 }
 
-export type ILocalDBGetAllRecordsParams<T extends EV4LocalDBStoreNames> = {
+export type IV4LocalDBGetAllRecordsParams<T extends EV4LocalDBStoreNames> = {
   name: T;
-} & ILocalDBGetRecordsQuery;
-export interface ILocalDBGetAllRecordsResult<T extends EV4LocalDBStoreNames> {
-  records: ILocalDBRecord<T>[];
+} & IV4LocalDBGetRecordsQuery;
+export interface IV4LocalDBGetAllRecordsResult<T extends EV4LocalDBStoreNames> {
+  records: IV4LocalDBRecord<T>[];
   // recordPairs is only available of txGetAllRecords()
 }
 
 // UpdateRecords
-export interface ILocalDBTxUpdateRecordsParams<T extends EV4LocalDBStoreNames> {
-  tx: ILocalDBTransaction;
+export interface IV4LocalDBTxUpdateRecordsParams<
+  T extends EV4LocalDBStoreNames,
+> {
+  tx: IV4LocalDBTransaction;
   name: T;
-  recordPairs?: ILocalDBRecordPair<T>[];
+  recordPairs?: IV4LocalDBRecordPair<T>[];
   ids?: string[];
-  updater: ILocalDBRecordUpdater<T>;
+  updater: IV4LocalDBRecordUpdater<T>;
 }
 
 // AddRecords
-export interface ILocalDBTxAddRecordsParams<T extends EV4LocalDBStoreNames> {
-  tx: ILocalDBTransaction;
+export interface IV4LocalDBTxAddRecordsParams<T extends EV4LocalDBStoreNames> {
+  tx: IV4LocalDBTransaction;
   name: T;
-  records: ILocalDBRecord<T>[];
+  records: IV4LocalDBRecord<T>[];
   skipIfExists?: boolean; // TODO skip
 }
-export interface ILocalDBTxAddRecordsResult {
+export interface IV4LocalDBTxAddRecordsResult {
   added: number;
   addedIds: string[];
   skipped: number;
@@ -351,23 +358,18 @@ export interface ILocalDBTxAddRecordsResult {
 
 // RemoveRecords
 
-export interface ILocalDBTxRemoveRecordsParams<T extends EV4LocalDBStoreNames> {
-  tx: ILocalDBTransaction;
+export interface IV4LocalDBTxRemoveRecordsParams<
+  T extends EV4LocalDBStoreNames,
+> {
+  tx: IV4LocalDBTransaction;
   name: T;
-  recordPairs?: ILocalDBRecordPair<T>[];
+  recordPairs?: IV4LocalDBRecordPair<T>[];
   ids?: string[];
   ignoreNotFound?: boolean;
 }
 
-export type ILocalDBRecordUpdater<T extends EV4LocalDBStoreNames> = <
-  T1 extends ILocalDBRecord<T> | IRealmDBSchemaMap[T],
+export type IV4LocalDBRecordUpdater<T extends EV4LocalDBStoreNames> = <
+  T1 extends IV4LocalDBRecord<T> | IV4RealmDBSchemaMap[T],
 >(
   record: T1,
 ) => Promise<T1> | T1;
-
-export type ILocalDBWithTransactionTask<T> = (
-  tx: ILocalDBTransaction,
-) => Promise<T>;
-export type ILocalDBWithTransactionOptions = {
-  readOnly?: boolean;
-};

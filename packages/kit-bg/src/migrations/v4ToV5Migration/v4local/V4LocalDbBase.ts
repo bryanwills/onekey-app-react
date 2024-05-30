@@ -6,13 +6,17 @@ import {
 
 import { V4LocalDbBaseContainer } from './V4LocalDbBaseContainer';
 
-import type { IDBWalletIdSingleton, IV4DBWallet } from './v4localDBTypes';
+import type { IV4DBWallet, IV4DBWalletIdSingleton } from './v4localDBTypes';
 import type { IAvatarInfo } from '../v4types';
 
 export abstract class V4LocalDbBase extends V4LocalDbBaseContainer {
-  buildSingletonWalletRecord({ walletId }: { walletId: IDBWalletIdSingleton }) {
+  buildSingletonWalletRecord({
+    walletId,
+  }: {
+    walletId: IV4DBWalletIdSingleton;
+  }) {
     const walletConfig: Record<
-      IDBWalletIdSingleton,
+      IV4DBWalletIdSingleton,
       {
         avatar: IAvatarInfo;
         walletNo: number;

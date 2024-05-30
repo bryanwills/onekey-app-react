@@ -4,7 +4,7 @@ import { V4RealmObjectBase } from '../base/V4RealmObjectBase';
 import type { IV4DBCredentialBase } from '../../v4localDBTypes';
 import type Realm from 'realm';
 
-class RealmSchemaCredential extends V4RealmObjectBase<IV4DBCredentialBase> {
+class V4RealmSchemaCredential extends V4RealmObjectBase<IV4DBCredentialBase> {
   public id!: string;
 
   public credential!: string;
@@ -25,4 +25,4 @@ class RealmSchemaCredential extends V4RealmObjectBase<IV4DBCredentialBase> {
     };
   }
 }
-export { RealmSchemaCredential as V4RealmSchemaCredential };
+export { V4RealmSchemaCredential };
