@@ -10,11 +10,11 @@
 // CustomFeeSchema,
 
 export enum EV4LocalDBStoreNames {
-  Context = 'context',
-  Credential = 'credentials',
-  Wallet = 'wallets',
-  Account = 'accounts',
-  Device = 'devices',
-  AccountDerivation = 'account_derivations',
+  Context = 'Context',
+  Credential = 'Credential',
+  Wallet = 'Wallet',
+  Account = 'Account',
+  Device = 'Device',
+  AccountDerivation = 'AccountDerivation',
   // CustomFee = 'custom_fee',
 }

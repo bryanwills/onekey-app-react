@@ -57,6 +57,11 @@ const restrictedImportsPatterns = [
       'import localDbInstance directly is not allowd, use localDb instead',
   },
   {
+    group: ['**/v4localDbInstance.native'],
+    message:
+      'import v4localDbInstance.native directly is not allowd, use v4localDbInstance instead',
+  },
+  {
     group: [
       '**/v4ToV5Migration',
       'v4ToV5Migration/**',

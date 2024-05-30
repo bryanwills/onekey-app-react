@@ -51,7 +51,7 @@ export class V4LocalDbRealm extends V4LocalDbBase {
     if (process.env.NODE_ENV !== 'production') {
       global.$$realm = realm;
       setTimeout(() => {
-        appEventBus.emit(EAppEventBusNames.RealmInit, undefined);
+        appEventBus.emit(EAppEventBusNames.V4RealmInit, undefined);
       }, 3000);
     }
     const db = new V4RealmDBAgent(realm);

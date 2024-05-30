@@ -7,7 +7,7 @@ import {
 import { V4LocalDbBaseContainer } from './V4LocalDbBaseContainer';
 
 import type { IV4DBWallet, IV4DBWalletIdSingleton } from './v4localDBTypes';
-import type { IAvatarInfo } from '../v4types';
+import type { IV4AvatarInfo } from '../v4types';
 
 export abstract class V4LocalDbBase extends V4LocalDbBaseContainer {
   buildSingletonWalletRecord({
@@ -18,7 +18,7 @@ export abstract class V4LocalDbBase extends V4LocalDbBaseContainer {
     const walletConfig: Record<
       IV4DBWalletIdSingleton,
       {
-        avatar: IAvatarInfo;
+        avatar: IV4AvatarInfo;
         walletNo: number;
       }
     > = {

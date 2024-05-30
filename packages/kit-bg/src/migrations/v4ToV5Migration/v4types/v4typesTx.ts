@@ -261,7 +261,7 @@ export type IV4DecodedTx = {
   tokenIdOnNetwork?: string; // indicates this tx belongs to which token
 };
 
-export type IAvatarInfo = {
+export type IV4AvatarInfo = {
   emoji?: IEmojiTypes | 'img';
   bgColor?: string;
 };
