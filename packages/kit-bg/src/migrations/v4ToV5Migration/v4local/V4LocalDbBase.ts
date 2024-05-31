@@ -44,8 +44,6 @@ export abstract class V4LocalDbBase extends V4LocalDbBaseContainer {
       type: walletId,
       backuped: true,
       accounts: [],
-      nextIndex: 0,
-      walletNo: walletConfig?.[walletId]?.walletNo ?? 0,
       nextAccountIds: { 'global': 1 },
     };
     return record;
