@@ -1,10 +1,13 @@
+import platformEnv from '@onekeyhq/shared/src/platformEnv';
 import { ensureRunOnBackground } from '@onekeyhq/shared/src/utils/assertUtils';
 
 import v4localDbInstance from './v4local/v4localDbInstance';
+import { EV4LocalDBStoreNames } from './v4local/v4localDBStoreNames';
 import { V4ReduxDb } from './v4redux/V4ReduxDb';
 import { V4SimpleDb } from './v4simple/V4SimpleDb';
 
 import type { V4LocalDbBase } from './v4local/V4LocalDbBase';
+import type { V4LocalDbRealm } from './v4local/v4realm/V4LocalDbRealm';
 
 ensureRunOnBackground();
 
@@ -47,10 +50,39 @@ export class V4ToV5MigrationController {
         accountId: 'hd-1--1',
         networkId: 'evm--1',
       });
+    const dbWallets = await this.v4localDb.getAllRecords({
+      name: EV4LocalDBStoreNames.Wallet,
+    });
+    const dbAccounts = await this.v4localDb.getAllRecords({
+      name: EV4LocalDBStoreNames.Account,
+    });
+    const allAccounts = dbAccounts.records;
+    const dbWallet = dbWallets.records[0];
     const result = {
       simpleDbAccountHistory,
       reduxSettings: data?.settings,
+      dbWallet,
+      accounts: dbWallet.accounts,
+      associatedDevice: dbWallet.associatedDevice,
+      allAccounts: dbAccounts.records,
     };
+    console.log('testV4MigrationData', result);
+    console.log(
+      'testV4MigrationData allAccounts ============',
+      JSON.stringify(allAccounts, null, 2),
+    );
+    console.log(
+      'testV4MigrationData wallet ============',
+      JSON.stringify(dbWallets.records, null, 2),
+    );
+    if (platformEnv.isNative) {
+      console.log({
+        dbVersion: (await (global.$$localDbV4 as V4LocalDbRealm).readyDb)?.realm
+          ?.schemaVersion,
+        dbName: (await (global.$$localDbV4 as V4LocalDbRealm).readyDb)?.realm
+          ?.path,
+      });
+    }
     return result;
   }
 }

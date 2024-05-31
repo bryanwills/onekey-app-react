@@ -10,6 +10,8 @@ import type {
   IV4DBVariantAccount,
 } from '../../v4localDBTypes';
 import type Realm from 'realm';
+import { V4RealmSchemaToken } from './V4RealmSchemaToken';
+import { V4RealmSchemaWallet } from './V4RealmSchemaWallet';
 
 class V4RealmSchemaAccount extends V4RealmObjectBase<IV4DBAccount> {
   public id!: string;
@@ -34,9 +36,9 @@ class V4RealmSchemaAccount extends V4RealmObjectBase<IV4DBAccount> {
 
   public customAddresses?: Realm.Dictionary<string>;
 
-  // public tokens?: Realm.Set<TokenSchema>;
+  public tokens?: Realm.Set<V4RealmSchemaToken>;
 
-  // public assignee!: Realm.Results<WalletSchema>;
+  public assignee!: Realm.Results<V4RealmSchemaWallet>;
 
   public template?: string;
 
@@ -59,17 +61,17 @@ class V4RealmSchemaAccount extends V4RealmObjectBase<IV4DBAccount> {
         default: {},
         objectType: 'string',
       },
-      // tokens: {
-      //   // type: 'Token<>',
-      //   type: 'list',
-      //   objectType: 'TokenSchema',
-      //   default: [],
-      // },
-      // assignee: {
-      //   type: 'linkingObjects',
-      //   objectType: 'Wallet',
-      //   property: 'accounts',
-      // },
+      tokens: {
+        // type: 'Token<>',
+        type: 'set',
+        objectType: 'Token',
+        default: [],
+      },
+      assignee: {
+        type: 'linkingObjects',
+        objectType: 'Wallet',
+        property: 'accounts',
+      },
       template: 'string?',
     },
   };

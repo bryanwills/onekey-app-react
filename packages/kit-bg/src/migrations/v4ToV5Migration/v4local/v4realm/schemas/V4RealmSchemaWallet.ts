@@ -1,6 +1,8 @@
 import { EV4LocalDBStoreNames } from '../../v4localDBStoreNames';
 import { V4RealmObjectBase } from '../base/V4RealmObjectBase';
 
+import type { V4RealmSchemaAccount } from './V4RealmSchemaAccount';
+import type { V4RealmSchemaDevice } from './V4RealmSchemaDevice';
 import type { IV4DBWallet, IV4DBWalletType } from '../../v4localDBTypes';
 import type Realm from 'realm';
 
@@ -15,11 +17,13 @@ class V4RealmSchemaWallet extends V4RealmObjectBase<IV4DBWallet> {
 
   public backuped?: boolean;
 
-  public accounts?: string[];
+  public accounts?: Realm.Set<V4RealmSchemaAccount>;
+  // public accounts?: string[];
 
   public nextAccountIds?: Realm.Dictionary<number>;
 
-  public associatedDevice?: string;
+  public associatedDevice?: V4RealmSchemaDevice;
+  // public associatedDevice?: string;
 
   public deviceType?: string;
 
@@ -34,14 +38,20 @@ class V4RealmSchemaWallet extends V4RealmObjectBase<IV4DBWallet> {
       avatar: 'string?',
       type: 'string',
       backuped: { type: 'bool', default: false },
-      // accounts: { type: 'Account<>', default: [] },
-      accounts: 'string?[]',
+      accounts: {
+        // type: 'Account<>',
+        type: 'set',
+        objectType: 'Account',
+        default: [],
+      },
+      // accounts: 'string?[]',
       nextAccountIds: {
         type: 'dictionary',
         default: {},
         objectType: 'int',
       },
-      associatedDevice: 'string?',
+      associatedDevice: 'Device?',
+      // associatedDevice: 'string?',
       deviceType: 'string?',
       passphraseState: 'string?',
     },
@@ -55,11 +65,11 @@ class V4RealmSchemaWallet extends V4RealmObjectBase<IV4DBWallet> {
       type: this.type,
       backuped: this.backuped || false,
       // convert RealmDB list to array
-      accounts: Array.from(this.accounts || []),
+      accounts: (this.accounts || []).map((account) => account.id),
       nextAccountIds: Object.fromEntries(
         Object.entries(Object(this.nextAccountIds)),
       ),
-      associatedDevice: this.associatedDevice,
+      associatedDevice: this.associatedDevice?.id,
       deviceType: this.deviceType,
       passphraseState: this.passphraseState,
     };

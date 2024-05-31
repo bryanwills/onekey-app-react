@@ -1,3 +1,4 @@
+/* eslint-disable spellcheck/spell-checker */
 import type {
   WALLET_TYPE_EXTERNAL,
   WALLET_TYPE_HD,
@@ -7,7 +8,7 @@ import type {
   WALLET_TYPE_WATCHING,
 } from '@onekeyhq/shared/src/consts/dbConsts';
 
-import type { EV4DBAccountType } from '../v4types';
+import type { EV4DBAccountType, EV4TokenRiskLevel } from '../v4types';
 import type { IDeviceType } from '@onekeyfe/hd-core';
 
 export type IV4DBWalletId =
@@ -70,6 +71,7 @@ export type IV4DBContext = {
   verifyString: string;
   networkOrderChanged?: boolean;
   backupUUID: string;
+  pendingWallets?: string[];
 };
 
 export type IV4DBDevice = IV4DBBaseObjectWithName & {
@@ -134,3 +136,26 @@ export type IV4DBAccount =
   | IV4DBUtxoAccount
   | IV4DBVariantAccount
   | IV4DBExternalAccount;
+
+export type IV4DBToken = IV4DBBaseObjectWithName & {
+  isNative?: boolean;
+  networkId: string;
+  tokenIdOnNetwork: string;
+  symbol: string;
+  decimals: number;
+  logoURI: string;
+  address?: string;
+  impl?: string;
+  chainId?: string;
+  source?: string;
+  coingeckoId?: string;
+  swftId?: string;
+  marketCap?: number;
+  addToIndex?: boolean;
+  autoDetected?: boolean;
+  sendAddress?: string;
+  onramperId?: string;
+  moonpayId?: string;
+
+  riskLevel?: EV4TokenRiskLevel;
+};

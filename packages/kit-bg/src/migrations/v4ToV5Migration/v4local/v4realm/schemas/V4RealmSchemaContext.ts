@@ -15,7 +15,7 @@ class V4RealmSchemaContext extends V4RealmObjectBase<IV4DBContext> {
 
   public networkOrderChanged?: boolean;
 
-  // pendingWallets
+  public pendingWallets?: Realm.Set<string>;
 
   public backupUUID!: string;
 
@@ -27,6 +27,12 @@ class V4RealmSchemaContext extends V4RealmObjectBase<IV4DBContext> {
       nextHD: 'int',
       verifyString: 'string',
       networkOrderChanged: { type: 'bool', default: false },
+      pendingWallets: {
+        // type: 'string<>',
+        type: 'set',
+        objectType: 'string',
+        default: [],
+      },
       backupUUID: { type: 'string', default: '' },
     },
   };
@@ -38,6 +44,7 @@ class V4RealmSchemaContext extends V4RealmObjectBase<IV4DBContext> {
       verifyString: this.verifyString,
       networkOrderChanged: this.networkOrderChanged || false,
       backupUUID: this.backupUUID,
+      pendingWallets: Array.from(this.pendingWallets || []),
     };
   }
 }

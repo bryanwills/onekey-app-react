@@ -179,6 +179,13 @@ const SendGallery = () => (
             <Stack>
               <ExternalAccountSign />
               <SendTestButton />
+              <Button
+                onPress={() => {
+                  void backgroundApiProxy.serviceDemo.testV4Migration();
+                }}
+              >
+                Test v4 migration
+              </Button>
             </Stack>
           </AccountSelectorProviderMirror>
         ),

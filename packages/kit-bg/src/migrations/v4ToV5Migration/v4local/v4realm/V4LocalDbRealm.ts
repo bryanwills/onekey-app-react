@@ -18,13 +18,13 @@ import { V4LocalDbBase } from '../V4LocalDbBase';
 import { V4_REALM_DB_NAME, V4_REALM_DB_VERSION } from '../v4localDBConsts';
 import { EV4LocalDBStoreNames } from '../v4localDBStoreNames';
 
-import { v4realmDBSchemas } from './schemas';
+import { v4realmDBSchemas, v4realmDBSchemasExtra } from './schemas';
 import { V4RealmDBAgent } from './V4RealmDBAgent';
 
 import type { IV4DBWalletIdSingleton } from '../v4localDBTypes';
 
 export class V4LocalDbRealm extends V4LocalDbBase {
-  protected override readyDb: Promise<V4RealmDBAgent>;
+  override readyDb: Promise<V4RealmDBAgent>;
 
   constructor() {
     super();
@@ -40,7 +40,10 @@ export class V4LocalDbRealm extends V4LocalDbBase {
     const realm = await Realm.open({
       path: V4_REALM_DB_NAME,
       schemaVersion: V4_REALM_DB_VERSION,
-      schema: v4realmDBSchemas as any,
+      schema: [
+        ...(v4realmDBSchemas as any[]),
+        ...(v4realmDBSchemasExtra as any[]),
+      ],
       onMigration: (oldRealm: Realm, newRealm: Realm) => {
         const oldVersion = oldRealm.schemaVersion;
         const newVersion = newRealm.schemaVersion;
