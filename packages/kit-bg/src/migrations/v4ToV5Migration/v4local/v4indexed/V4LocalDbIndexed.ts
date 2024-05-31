@@ -61,6 +61,7 @@ export class V4LocalDbIndexed extends V4LocalDbBase {
     }
 
     // TODO  migrate old data to new stores
+    // request.onupgradeneeded
 
     // delete removed stores
     const storeNamesToRemove = difference(currentStoreNames, storeNamesToAdd);
