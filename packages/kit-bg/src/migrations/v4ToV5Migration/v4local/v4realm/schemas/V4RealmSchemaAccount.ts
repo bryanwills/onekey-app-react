@@ -2,6 +2,8 @@ import { EV4DBAccountType } from '../../../v4types';
 import { EV4LocalDBStoreNames } from '../../v4localDBStoreNames';
 import { V4RealmObjectBase } from '../base/V4RealmObjectBase';
 
+import type { V4RealmSchemaToken } from './V4RealmSchemaToken';
+import type { V4RealmSchemaWallet } from './V4RealmSchemaWallet';
 import type {
   IV4DBAccount,
   // IV4DBExternalAccount,
@@ -10,8 +12,6 @@ import type {
   IV4DBVariantAccount,
 } from '../../v4localDBTypes';
 import type Realm from 'realm';
-import { V4RealmSchemaToken } from './V4RealmSchemaToken';
-import { V4RealmSchemaWallet } from './V4RealmSchemaWallet';
 
 class V4RealmSchemaAccount extends V4RealmObjectBase<IV4DBAccount> {
   public id!: string;

@@ -186,6 +186,44 @@ const SendGallery = () => (
               >
                 Test v4 migration
               </Button>
+              <Button
+                onPress={async () => {
+                  const r =
+                    await backgroundApiProxy.serviceDemo.prepareMigration();
+                  console.log(r);
+                }}
+              >
+                prepareMigration
+              </Button>
+              <Button
+                onPress={async () => {
+                  const r =
+                    await backgroundApiProxy.serviceDemo.getV4WalletsForBackup();
+                  console.log(r);
+                }}
+              >
+                getV4WalletsForBackup
+              </Button>
+              <Button
+                onPress={async () => {
+                  const r =
+                    await backgroundApiProxy.serviceDemo.revealV4Mnemonic({
+                      hdWalletId: 'hd-1',
+                    });
+                  console.log(r);
+                }}
+              >
+                revealV4Mnemonic
+              </Button>
+              <Button
+                onPress={async () => {
+                  const r =
+                    await backgroundApiProxy.serviceDemo.startV4MigrationFlow();
+                  console.log(r);
+                }}
+              >
+                startV4MigrationFlow
+              </Button>
             </Stack>
           </AccountSelectorProviderMirror>
         ),

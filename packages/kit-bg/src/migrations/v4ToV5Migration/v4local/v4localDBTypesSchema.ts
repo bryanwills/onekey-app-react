@@ -8,8 +8,8 @@ import type {
   WALLET_TYPE_WATCHING,
 } from '@onekeyhq/shared/src/consts/dbConsts';
 
-import type { EV4DBAccountType, EV4TokenRiskLevel } from '../v4types';
 import type { IDeviceType } from '@onekeyfe/hd-core';
+import type { EV4DBAccountType, EV4TokenRiskLevel } from '../v4types';
 
 export type IV4DBWalletId =
   | string // hd-xxx, hw-xxx
@@ -56,7 +56,7 @@ export type IV4DBWallet = IV4DBBaseObjectWithName & {
     [template: string]: number; // hd
   };
   associatedDevice?: string; // alias to `dbDeviceId`
-  avatar?: IV4DBAvatar;
+  avatar?: IV4DBAvatar; // indexedDB is object, realmDB is string
   //   avatarInfo?: IAvatarInfo; // readonly field
   hiddenWallets?: IV4DBWallet[]; // readonly field
   passphraseState?: string;
@@ -90,6 +90,10 @@ export type IV4DBDevice = IV4DBBaseObjectWithName & {
   updatedAt: number;
 };
 
+export type IV4DBHdCredentialRaw = {
+  entropy: string;
+  seed: string;
+};
 export type IV4DBCredentialBase = {
   id: string;
   // type: 'imported' | 'hd';

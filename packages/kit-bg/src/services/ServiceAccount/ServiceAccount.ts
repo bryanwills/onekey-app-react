@@ -505,7 +505,7 @@ class ServiceAccount extends ServiceBase {
       importedCredential,
     });
     if (shouldCreateIndexAccount) {
-      await localDb.addIndexedAccount({
+      await this.addIndexedAccount({
         walletId,
         indexes: accounts.map((account) =>
           account.indexedAccountId
@@ -1018,7 +1018,7 @@ class ServiceAccount extends ServiceBase {
   }
 
   @backgroundMethod()
-  async addHDIndexedAccount({
+  async addIndexedAccount({
     walletId,
     indexes,
     skipIfExists,
@@ -1152,7 +1152,13 @@ class ServiceAccount extends ServiceBase {
   }
 
   @backgroundMethod()
-  async createHDWallet({ mnemonic }: { mnemonic: string }) {
+  async createHDWallet({
+    name,
+    mnemonic,
+  }: {
+    mnemonic: string;
+    name?: string;
+  }) {
     const { servicePassword } = this.backgroundApi;
     const { password } = await servicePassword.promptPasswordVerify({
       reason: EReasonForNeedPassword.CreateOrRemoveWallet,
@@ -1172,7 +1178,7 @@ class ServiceAccount extends ServiceBase {
       throw new InvalidMnemonic();
     }
 
-    return this.createHDWalletWithRs({ rs, password });
+    return this.createHDWalletWithRs({ rs, password, name });
   }
 
   @backgroundMethod()
@@ -1180,10 +1186,12 @@ class ServiceAccount extends ServiceBase {
     rs,
     password,
     avatarInfo,
+    name,
   }: {
     rs: string;
     password: string;
     avatarInfo?: IAvatarInfo;
+    name?: string;
   }) {
     ensureSensitiveTextEncoded(password);
 
@@ -1192,6 +1200,7 @@ class ServiceAccount extends ServiceBase {
       rs,
       backuped: false,
       avatar: avatarInfo ?? randomAvatar(),
+      name,
     });
 
     await timerUtils.wait(100);

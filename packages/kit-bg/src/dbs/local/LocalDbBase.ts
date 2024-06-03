@@ -60,6 +60,7 @@ import { EDBAccountType } from './consts';
 import { LocalDbBaseContainer } from './LocalDbBaseContainer';
 import { ELocalDBStoreNames } from './localDBStoreNames';
 
+import type { IDeviceType } from '@onekeyfe/hd-core';
 import type {
   IDBAccount,
   IDBAccountDerivation,
@@ -89,7 +90,6 @@ import type {
   ILocalDBTransaction,
   ILocalDBTxGetRecordByIdResult,
 } from './types';
-import type { IDeviceType } from '@onekeyfe/hd-core';
 
 export abstract class LocalDbBase extends LocalDbBaseContainer {
   tempWallets: {
@@ -339,6 +339,32 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
     });
   }
 
+  async updateContextVerifyString({ verifyString }: { verifyString: string }) {
+    const db = await this.readyDb;
+    await db.withTransaction(async (tx) => {
+      await this.txUpdateContextVerifyString({
+        tx,
+        verifyString,
+      });
+    });
+  }
+
+  async txUpdateContextVerifyString({
+    tx,
+    verifyString,
+  }: {
+    tx: ILocalDBTransaction;
+    verifyString: string;
+  }) {
+    await this.txUpdateContext({
+      tx,
+      updater: (record) => {
+        record.verifyString = verifyString;
+        return record;
+      },
+    });
+  }
+
   async updatePassword({
     oldPassword,
     newPassword,
@@ -366,15 +392,12 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
       }
 
       // update context verifyString
-      await this.txUpdateContext({
+      await this.txUpdateContextVerifyString({
         tx,
-        updater: (record) => {
-          record.verifyString = encrypt(
-            newPassword,
-            Buffer.from(DEFAULT_VERIFY_STRING),
-          ).toString('hex');
-          return record;
-        },
+        verifyString: encrypt(
+          newPassword,
+          Buffer.from(DEFAULT_VERIFY_STRING),
+        ).toString('hex'),
       });
     });
   }
