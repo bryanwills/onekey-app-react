@@ -60,7 +60,6 @@ import { EDBAccountType } from './consts';
 import { LocalDbBaseContainer } from './LocalDbBaseContainer';
 import { ELocalDBStoreNames } from './localDBStoreNames';
 
-import type { IDeviceType } from '@onekeyfe/hd-core';
 import type {
   IDBAccount,
   IDBAccountDerivation,
@@ -90,6 +89,7 @@ import type {
   ILocalDBTransaction,
   ILocalDBTxGetRecordByIdResult,
 } from './types';
+import type { IDeviceType } from '@onekeyfe/hd-core';
 
 export abstract class LocalDbBase extends LocalDbBaseContainer {
   tempWallets: {

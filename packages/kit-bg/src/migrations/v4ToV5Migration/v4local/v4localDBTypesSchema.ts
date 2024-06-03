@@ -8,8 +8,8 @@ import type {
   WALLET_TYPE_WATCHING,
 } from '@onekeyhq/shared/src/consts/dbConsts';
 
-import type { IDeviceType } from '@onekeyfe/hd-core';
 import type { EV4DBAccountType, EV4TokenRiskLevel } from '../v4types';
+import type { IDeviceType } from '@onekeyfe/hd-core';
 
 export type IV4DBWalletId =
   | string // hd-xxx, hw-xxx

@@ -30,9 +30,9 @@ import { CoreSDKLoader } from '../hardware/instance';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import networkUtils from './networkUtils';
 
-import type { SearchDevice } from '@onekeyfe/hd-core';
 import type { IOneKeyDeviceFeatures } from '../../types/device';
 import type { IExternalConnectionInfo } from '../../types/externalWallet.types';
+import type { SearchDevice } from '@onekeyfe/hd-core';
 
 function getWalletIdFromAccountId({ accountId }: { accountId: string }) {
   /*
@@ -234,8 +234,8 @@ function findIndexFromTemplate({
     if (tplItem === INDEX_PLACEHOLDER && pathItem) {
       return Number(pathItem);
     }
-    if (tplItem === INDEX_PLACEHOLDER + "'" && pathItem) {
-      return Number(pathItem.replace(/\'+$/,''));
+    if (tplItem === `${INDEX_PLACEHOLDER}'` && pathItem) {
+      return Number(pathItem.replace(/'+$/, ''));
     }
   }
   return undefined;
