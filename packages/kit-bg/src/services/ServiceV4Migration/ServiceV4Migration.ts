@@ -276,6 +276,7 @@ class ServiceV4Migration extends ServiceBase {
     return true;
   }
 
+  // TODO clear migrationPayload when exit migration or focus home page
   migrationPayload: IV4MigrationPayload | undefined;
 
   @backgroundMethod()
@@ -371,6 +372,8 @@ class ServiceV4Migration extends ServiceBase {
         await this.migrateWatchingAccounts({ v4wallet: wallet.wallet });
       }
     }
+
+    this.migrationPayload = undefined;
     // TODO skip backup within flow
     void this.backgroundApi.serviceCloudBackup.requestAutoBackup();
     // await this.migrateHdWallet({})

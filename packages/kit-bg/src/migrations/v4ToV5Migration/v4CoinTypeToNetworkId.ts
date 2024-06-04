@@ -26,6 +26,7 @@ import {
   COINTYPE_SUI,
   COINTYPE_TBTC,
   COINTYPE_TRON,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   COINTYPE_XMR,
   COINTYPE_XRP,
 } from '@onekeyhq/shared/src/engine/engineConsts';
