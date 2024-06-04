@@ -1,0 +1,9 @@
+/*!
+ * toidentifier
+ * Copyright(c) 2016 Douglas Christopher Wilson
+ * MIT Licensed
+ */
+
+/*! MIT License. Copyright 2015-2022 Richard Moore <me@ricmoo.com>. See LICENSE.txt. */
+
+/*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) */
