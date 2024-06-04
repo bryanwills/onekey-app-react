@@ -2,7 +2,11 @@
 import { isNil, uniq } from 'lodash';
 import natsort from 'natsort';
 
-import { decrypt, revealEntropyToMnemonic } from '@onekeyhq/core/src/secret';
+import {
+  decrypt,
+  fixV4VerifyStringToV5,
+  revealEntropyToMnemonic,
+} from '@onekeyhq/core/src/secret';
 import {
   backgroundClass,
   backgroundMethod,
@@ -259,7 +263,9 @@ class ServiceV4Migration extends ServiceBase {
       );
       if (v4context?.verifyString) {
         await localDb.updateContextVerifyString({
-          verifyString: v4context.verifyString,
+          verifyString: fixV4VerifyStringToV5({
+            verifyString: v4context.verifyString,
+          }),
         });
       }
       // TODO migrate backupUUID?

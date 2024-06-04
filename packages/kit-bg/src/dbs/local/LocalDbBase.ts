@@ -1,18 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // eslint-disable-next-line max-classes-per-file
-import { Buffer } from 'buffer';
 
 import { isNil, max, uniq } from 'lodash';
 import natsort from 'natsort';
 
 import type { IBip39RevealableSeed } from '@onekeyhq/core/src/secret';
 import {
-  decrypt,
   decryptImportedCredential,
   decryptRevealableSeed,
-  encrypt,
+  decryptVerifyString,
   encryptImportedCredential,
   encryptRevealableSeed,
+  encryptVerifyString,
   ensureSensitiveTextEncoded,
   sha256,
 } from '@onekeyhq/core/src/secret';
@@ -234,10 +233,10 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
     }
     try {
       return (
-        decrypt(
+        decryptVerifyString({
           password,
-          Buffer.from(context.verifyString, 'hex'),
-        ).toString() === DEFAULT_VERIFY_STRING
+          verifyString: context.verifyString,
+        }) === DEFAULT_VERIFY_STRING
       );
     } catch {
       return false;
@@ -394,10 +393,7 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
       // update context verifyString
       await this.txUpdateContextVerifyString({
         tx,
-        verifyString: encrypt(
-          newPassword,
-          Buffer.from(DEFAULT_VERIFY_STRING),
-        ).toString('hex'),
+        verifyString: encryptVerifyString({ password: newPassword }),
       });
     });
   }
