@@ -192,9 +192,12 @@ class ServiceNetwork extends ServiceBase {
   }: {
     networkId: string;
     template: string | undefined;
-  }): Promise<IAccountDeriveTypes> {
+  }): Promise<{
+    deriveType: IAccountDeriveTypes;
+    deriveInfo: IAccountDeriveInfo | undefined;
+  }> {
     if (!template) {
-      return 'default';
+      return { deriveType: 'default', deriveInfo: undefined };
     }
     const deriveInfoItems = await this.getDeriveInfoItemsOfNetwork({
       networkId,
@@ -203,7 +206,10 @@ class ServiceNetwork extends ServiceBase {
       (item) => item.item.template === template,
     );
     const deriveType = deriveInfo?.value as IAccountDeriveTypes | undefined;
-    return deriveType || 'default';
+    return {
+      deriveType: deriveType || 'default',
+      deriveInfo: deriveInfo?.item,
+    };
   }
 
   @backgroundMethod()

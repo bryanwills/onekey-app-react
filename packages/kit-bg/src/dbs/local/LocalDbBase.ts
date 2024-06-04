@@ -1020,24 +1020,21 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
           },
         });
       } else {
-        await this.txAddRecords({
+        await this.txAddDbDevice({
           tx,
-          name: ELocalDBStoreNames.Device,
           skipIfExists: true,
-          records: [
-            {
-              id: dbDeviceId,
-              name: deviceName,
-              connectId: '',
-              uuid: '',
-              deviceId: rawDeviceId,
-              deviceType,
-              features: '',
-              settingsRaw: '',
-              createdAt: now,
-              updatedAt: now,
-            },
-          ],
+          device: {
+            id: dbDeviceId,
+            name: deviceName,
+            connectId: '',
+            uuid: '',
+            deviceId: rawDeviceId,
+            deviceType,
+            features: '',
+            settingsRaw: '',
+            createdAt: now,
+            updatedAt: now,
+          },
         });
 
         await this.txUpdateRecords({
@@ -1118,6 +1115,40 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
     });
   }
 
+  async addDbDevice({
+    device,
+    skipIfExists,
+  }: {
+    device: IDBDevice;
+    skipIfExists?: boolean;
+  }) {
+    const db = await this.readyDb;
+    return db.withTransaction(async (tx) =>
+      this.txAddDbDevice({
+        tx,
+        device,
+        skipIfExists,
+      }),
+    );
+  }
+
+  async txAddDbDevice({
+    tx,
+    device,
+    skipIfExists,
+  }: {
+    tx: ILocalDBTransaction;
+    device: IDBDevice;
+    skipIfExists?: boolean;
+  }) {
+    return this.txAddRecords({
+      tx,
+      name: ELocalDBStoreNames.Device,
+      skipIfExists,
+      records: [device],
+    });
+  }
+
   // TODO remove unused hidden wallet first
   async createHWWallet(params: IDBCreateHWWalletParams) {
     const db = await this.readyDb;
@@ -1139,7 +1170,7 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
     let walletName = name || deviceName;
     if (passphraseState) {
       // TODO use nextHidden in IDBWallet
-      walletName = 'Hidden Wallet #1';
+      walletName = name || 'Hidden Wallet #1';
     }
     const avatar: IAvatarInfo = {
       img: deviceType,
@@ -1163,26 +1194,23 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
     await db.withTransaction(async (tx) => {
       // add db device
       const now = Date.now();
-      await this.txAddRecords({
+      await this.txAddDbDevice({
         tx,
-        name: ELocalDBStoreNames.Device,
         skipIfExists: true,
-        records: [
-          {
-            id: dbDeviceId,
-            name: deviceName,
-            connectId: connectId || '',
-            uuid: deviceUUID,
-            deviceId: rawDeviceId,
-            deviceType,
-            features: featuresStr,
-            settingsRaw: JSON.stringify({
-              inputPinOnSoftware: true,
-            } as IDBDeviceSettings),
-            createdAt: now,
-            updatedAt: now,
-          },
-        ],
+        device: {
+          id: dbDeviceId,
+          name: deviceName,
+          connectId: connectId || '',
+          uuid: deviceUUID,
+          deviceId: rawDeviceId,
+          deviceType,
+          features: featuresStr,
+          settingsRaw: JSON.stringify({
+            inputPinOnSoftware: true,
+          } as IDBDeviceSettings),
+          createdAt: now,
+          updatedAt: now,
+        },
       });
 
       // update exists db device

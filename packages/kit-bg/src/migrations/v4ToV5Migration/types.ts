@@ -8,6 +8,7 @@ import type {
 export type IV4MigrationWallet = {
   wallet: IV4DBWallet;
   isHD: boolean;
+  isHw: boolean;
   isImported: boolean;
   isWatching: boolean;
   //   accounts: IV4DBAccount[];

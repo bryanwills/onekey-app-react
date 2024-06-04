@@ -21,7 +21,6 @@ export const storeNameSupportCreatedAt = [
   ELocalDBStoreNames.ConnectedSite,
 ];
 // ---------------------------------------------- enums
-
 export enum EDBAccountType {
   SIMPLE = 'simple',
   UTXO = 'utxo',
