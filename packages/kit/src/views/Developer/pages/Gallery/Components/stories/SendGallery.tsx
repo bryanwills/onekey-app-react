@@ -181,7 +181,7 @@ const SendGallery = () => (
               <SendTestButton />
               <Button
                 onPress={() => {
-                  void backgroundApiProxy.serviceDemo.testV4Migration();
+                  void backgroundApiProxy.serviceV4Migration.testShowData();
                 }}
               >
                 Test v4 migration
@@ -189,7 +189,7 @@ const SendGallery = () => (
               <Button
                 onPress={async () => {
                   const r =
-                    await backgroundApiProxy.serviceDemo.prepareMigration();
+                    await backgroundApiProxy.serviceV4Migration.prepareMigration();
                   console.log(r);
                 }}
               >
@@ -198,7 +198,7 @@ const SendGallery = () => (
               <Button
                 onPress={async () => {
                   const r =
-                    await backgroundApiProxy.serviceDemo.getV4WalletsForBackup();
+                    await backgroundApiProxy.serviceV4Migration.getV4WalletsForBackup();
                   console.log(r);
                 }}
               >
@@ -207,9 +207,11 @@ const SendGallery = () => (
               <Button
                 onPress={async () => {
                   const r =
-                    await backgroundApiProxy.serviceDemo.revealV4Mnemonic({
-                      hdWalletId: 'hd-1',
-                    });
+                    await backgroundApiProxy.serviceV4Migration.revealV4HdMnemonic(
+                      {
+                        hdWalletId: 'hd-1',
+                      },
+                    );
                   console.log(r);
                 }}
               >
@@ -218,7 +220,7 @@ const SendGallery = () => (
               <Button
                 onPress={async () => {
                   const r =
-                    await backgroundApiProxy.serviceDemo.startV4MigrationFlow();
+                    await backgroundApiProxy.serviceV4Migration.startV4MigrationFlow();
                   console.log(r);
                 }}
               >

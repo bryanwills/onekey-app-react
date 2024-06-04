@@ -566,7 +566,9 @@ class ServiceAccount extends ServiceBase {
     credential,
     networkId,
     deriveType,
+    name,
   }: {
+    name?: string;
     credential: string;
     networkId: string;
     deriveType: IAccountDeriveTypes | undefined;
@@ -593,7 +595,7 @@ class ServiceAccount extends ServiceBase {
     });
     const params: IPrepareImportedAccountsParams = {
       password,
-      name: '',
+      name: name || '',
       importedCredential: credentialEncrypt,
       createAtNetwork: networkId,
     };
@@ -728,12 +730,16 @@ class ServiceAccount extends ServiceBase {
     input,
     networkId,
     deriveType,
+    name,
     isUrlAccount,
+    skipAddIfNotEqualToAddress,
   }: {
     input: string;
     networkId: string;
+    name?: string;
     deriveType: IAccountDeriveTypes | undefined;
     isUrlAccount?: boolean;
+    skipAddIfNotEqualToAddress?: string;
   }) {
     const walletId = WALLET_TYPE_WATCHING;
 
@@ -766,7 +772,7 @@ class ServiceAccount extends ServiceBase {
     const params: IPrepareWatchingAccountsParams = {
       address,
       xpub,
-      name: '',
+      name: name || '',
       networks: [networkId],
       createAtNetwork: networkId,
       isUrlAccount,
@@ -782,6 +788,20 @@ class ServiceAccount extends ServiceBase {
 
     // addWatchingAccount
     const accounts = await vault.keyring.prepareAccounts(params);
+
+    if (
+      skipAddIfNotEqualToAddress &&
+      accounts.length === 1 &&
+      accounts?.[0]?.address &&
+      accounts?.[0]?.address !== skipAddIfNotEqualToAddress
+    ) {
+      return {
+        networkId,
+        walletId,
+        accounts: [],
+      };
+    }
+
     await localDb.addAccountsToWallet({
       walletId,
       accounts,

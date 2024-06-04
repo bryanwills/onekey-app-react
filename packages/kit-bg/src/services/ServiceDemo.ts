@@ -22,8 +22,6 @@ import {
 
 import localDb from '../dbs/local/localDb';
 import { ELocalDBStoreNames } from '../dbs/local/localDBStoreNames';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { V4ToV5MigrationController } from '../migrations/v4ToV5Migration/V4ToV5MigrationController';
 import { settingsPersistAtom } from '../states/jotai/atoms';
 import { vaultFactory } from '../vaults/factory';
 
@@ -39,35 +37,6 @@ class ServiceDemo extends ServiceBase {
   }
 
   // ---------------------------------------------- demo
-
-  v4ToV5MigrationCtrl = new V4ToV5MigrationController({
-    backgroundApi: this.backgroundApi,
-  });
-
-  @backgroundMethod()
-  async testV4Migration() {
-    void this.v4ToV5MigrationCtrl.testShowData();
-  }
-
-  @backgroundMethod()
-  async prepareMigration() {
-    return this.v4ToV5MigrationCtrl.prepareMigration();
-  }
-
-  @backgroundMethod()
-  async getV4WalletsForBackup() {
-    return this.v4ToV5MigrationCtrl.getV4WalletsForBackup();
-  }
-
-  @backgroundMethod()
-  async revealV4Mnemonic({ hdWalletId }: { hdWalletId: string }) {
-    return this.v4ToV5MigrationCtrl.revealV4Mnemonic({ hdWalletId });
-  }
-
-  @backgroundMethod()
-  async startV4MigrationFlow() {
-    return this.v4ToV5MigrationCtrl.startV4MigrationFlow();
-  }
 
   @backgroundMethod()
   async demoJotaiGetSettings() {

@@ -186,6 +186,26 @@ class ServiceNetwork extends ServiceBase {
     return settings.accountDeriveInfo;
   }
 
+  async getDeriveTypeByTemplate({
+    networkId,
+    template,
+  }: {
+    networkId: string;
+    template: string | undefined;
+  }): Promise<IAccountDeriveTypes> {
+    if (!template) {
+      return 'default';
+    }
+    const deriveInfoItems = await this.getDeriveInfoItemsOfNetwork({
+      networkId,
+    });
+    const deriveInfo = deriveInfoItems.find(
+      (item) => item.item.template === template,
+    );
+    const deriveType = deriveInfo?.value as IAccountDeriveTypes | undefined;
+    return deriveType || 'default';
+  }
+
   @backgroundMethod()
   async getDeriveInfoItemsOfNetwork({
     networkId,

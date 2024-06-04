@@ -94,6 +94,9 @@ export type IV4DBHdCredentialRaw = {
   entropy: string;
   seed: string;
 };
+export type IV4DBImportedCredentialRaw = {
+  privateKey: string;
+};
 export type IV4DBCredentialBase = {
   id: string;
   // type: 'imported' | 'hd';

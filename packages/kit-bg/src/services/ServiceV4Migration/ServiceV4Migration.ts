@@ -1,52 +1,52 @@
-import { isNil } from 'lodash';
+/* eslint-disable @typescript-eslint/no-restricted-imports */
+import { isNil, uniq } from 'lodash';
 import natsort from 'natsort';
 
 import { decrypt, revealEntropyToMnemonic } from '@onekeyhq/core/src/secret';
+import {
+  backgroundClass,
+  backgroundMethod,
+} from '@onekeyhq/shared/src/background/backgroundDecorators';
 import {
   DB_MAIN_CONTEXT_ID,
   WALLET_TYPE_HD,
 } from '@onekeyhq/shared/src/consts/dbConsts';
 import platformEnv from '@onekeyhq/shared/src/platformEnv';
 import accountUtils from '@onekeyhq/shared/src/utils/accountUtils';
-import { ensureRunOnBackground } from '@onekeyhq/shared/src/utils/assertUtils';
+import bufferUtils from '@onekeyhq/shared/src/utils/bufferUtils';
 import { EReasonForNeedPassword } from '@onekeyhq/shared/types/setting';
 
 import localDb from '../../dbs/local/localDb';
-
-import { v4CoinTypeToNetworkId } from './v4CoinTypeToNetworkId';
-import v4localDbInstance from './v4local/v4localDbInstance';
-import { EV4LocalDBStoreNames } from './v4local/v4localDBStoreNames';
-import { V4ReduxDb } from './v4redux/V4ReduxDb';
-import { V4SimpleDb } from './v4simple/V4SimpleDb';
+import { v4CoinTypeToNetworkId } from '../../migrations/v4ToV5Migration/v4CoinTypeToNetworkId';
+import v4localDbInstance from '../../migrations/v4ToV5Migration/v4local/v4localDbInstance';
+import { EV4LocalDBStoreNames } from '../../migrations/v4ToV5Migration/v4local/v4localDBStoreNames';
+import { V4ReduxDb } from '../../migrations/v4ToV5Migration/v4redux/V4ReduxDb';
+import { V4SimpleDb } from '../../migrations/v4ToV5Migration/v4simple/V4SimpleDb';
+import ServiceBase from '../ServiceBase';
 
 import type {
   IV4MigrationHdCredential,
+  IV4MigrationImportedCredential,
   IV4MigrationPayload,
   IV4MigrationWallet,
-} from './types';
-import type { V4LocalDbBase } from './v4local/V4LocalDbBase';
+} from '../../migrations/v4ToV5Migration/types';
+import type { V4LocalDbBase } from '../../migrations/v4ToV5Migration/v4local/V4LocalDbBase';
 import type {
   IV4DBAccount,
   IV4DBCredentialBase,
   IV4DBHdCredentialRaw,
+  IV4DBImportedCredentialRaw,
+  IV4DBUtxoAccount,
   IV4DBWallet,
-} from './v4local/v4localDBTypesSchema';
-import type { V4LocalDbRealm } from './v4local/v4realm/V4LocalDbRealm';
-import type { IBackgroundApi } from '../../apis/IBackgroundApi';
+} from '../../migrations/v4ToV5Migration/v4local/v4localDBTypes';
+import type { V4LocalDbRealm } from '../../migrations/v4ToV5Migration/v4local/v4realm/V4LocalDbRealm';
 import type { IAccountDeriveTypes } from '../../vaults/types';
 
-ensureRunOnBackground();
-
-if (process.env.NODE_ENV !== 'production') {
-  global.$$localDbV4 = v4localDbInstance;
-}
-
-export class V4ToV5MigrationController {
-  constructor({ backgroundApi }: { backgroundApi: IBackgroundApi }) {
-    this.backgroundApi = backgroundApi;
+@backgroundClass()
+class ServiceV4Migration extends ServiceBase {
+  constructor({ backgroundApi }: { backgroundApi: any }) {
+    super({ backgroundApi });
   }
-
-  backgroundApi: IBackgroundApi;
 
   _v4simpleDb: V4SimpleDb | undefined;
 
@@ -75,6 +75,7 @@ export class V4ToV5MigrationController {
     return this._v4localDb;
   }
 
+  @backgroundMethod()
   async testShowData() {
     const data = await this.v4reduxDb.reduxData;
     const simpleDbAccountHistory =
@@ -118,6 +119,33 @@ export class V4ToV5MigrationController {
     return result;
   }
 
+  async decryptV4ImportedCredential({
+    v4dbCredential,
+    encodedPassword,
+  }: {
+    v4dbCredential: IV4DBCredentialBase;
+    encodedPassword: string;
+  }): Promise<IV4MigrationImportedCredential> {
+    const credentialText: string = v4dbCredential.credential;
+    const credential = JSON.parse(credentialText);
+    if (v4dbCredential.id.startsWith('imported-')) {
+      const credentialImported = credential as IV4DBImportedCredentialRaw;
+      const privateKey = bufferUtils.bytesToHex(
+        decrypt(encodedPassword, credentialImported.privateKey),
+      );
+      const account = await this.v4localDb.getRecordById({
+        name: EV4LocalDBStoreNames.Account,
+        id: v4dbCredential.id,
+      });
+      return {
+        privateKey,
+        account,
+        dbCredentialRaw: credentialImported,
+      };
+    }
+    throw new Error(`Unsupported credential type: ${v4dbCredential.id}`);
+  }
+
   async decryptV4HdCredential({
     v4dbCredential,
     encodedPassword,
@@ -143,7 +171,7 @@ export class V4ToV5MigrationController {
         dbCredentialRaw: credentialHD,
       };
     }
-    throw new Error('Unsupported credential type');
+    throw new Error(`Unsupported credential type: ${v4dbCredential.id}`);
   }
 
   async getV4Credentials() {
@@ -177,6 +205,8 @@ export class V4ToV5MigrationController {
       result.push({
         wallet: v4wallet,
         isHD: accountUtils.isHdWallet({ walletId: v4wallet.id }),
+        isImported: accountUtils.isImportedWallet({ walletId: v4wallet.id }),
+        isWatching: accountUtils.isWatchingWallet({ walletId: v4wallet.id }),
         // accounts: v4accounts,
       });
     }
@@ -234,6 +264,7 @@ export class V4ToV5MigrationController {
 
   migrationPayload: IV4MigrationPayload | undefined;
 
+  @backgroundMethod()
   async prepareMigration(): Promise<IV4MigrationPayload> {
     this.migrationPayload = undefined;
     let migratePasswordOk = false;
@@ -261,6 +292,7 @@ export class V4ToV5MigrationController {
     return this.migrationPayload;
   }
 
+  @backgroundMethod()
   async getV4WalletsForBackup() {
     return this.migrationPayload?.walletsForBackup;
   }
@@ -273,7 +305,17 @@ export class V4ToV5MigrationController {
     return pwd;
   }
 
-  async revealV4Mnemonic({ hdWalletId }: { hdWalletId: string }) {
+  async getV4AccountsOfWallet({ v4wallet }: { v4wallet: IV4DBWallet }) {
+    const r = await this.v4localDb.getAllRecords({
+      name: EV4LocalDBStoreNames.Account,
+      ids: v4wallet.accounts,
+    });
+    const v4accounts: IV4DBAccount[] = r?.records || [];
+    return v4accounts;
+  }
+
+  @backgroundMethod()
+  async revealV4HdMnemonic({ hdWalletId }: { hdWalletId: string }) {
     const v4dbCredential: IV4DBCredentialBase =
       await this.v4localDb.getRecordById({
         name: EV4LocalDBStoreNames.Credential,
@@ -285,41 +327,133 @@ export class V4ToV5MigrationController {
     });
   }
 
-  // TODO revealV4PrivateKey()
+  async revealV4ImportedPrivateKey({ accountId }: { accountId: string }) {
+    const v4dbCredential: IV4DBCredentialBase =
+      await this.v4localDb.getRecordById({
+        name: EV4LocalDBStoreNames.Credential,
+        id: accountId,
+      });
+    return this.decryptV4ImportedCredential({
+      v4dbCredential,
+      encodedPassword: await this.getMigrationPassword(),
+    });
+  }
 
+  @backgroundMethod()
   async startV4MigrationFlow() {
     const wallets = this.migrationPayload?.wallets || [];
     for (const wallet of wallets) {
+      if (wallet.isImported) {
+        await this.migrateImportedAccounts({ v4wallet: wallet.wallet });
+      }
       if (wallet.isHD) {
-        await this.migrateHdWallet({ v4hdWallet: wallet.wallet });
+        await this.migrateHdWallet({ v4wallet: wallet.wallet });
+      }
+      if (wallet.isWatching) {
+        await this.migrateWatchingAccounts({ v4wallet: wallet.wallet });
       }
     }
     // await this.migrateHdWallet({})
   }
 
-  async getV4AccountsOfWallet({ v4hdWallet }: { v4hdWallet: IV4DBWallet }) {
-    const r = await this.v4localDb.getAllRecords({
-      name: EV4LocalDBStoreNames.Account,
-      ids: v4hdWallet.accounts,
-    });
-    const v4accounts: IV4DBAccount[] = r?.records || [];
-    return v4accounts;
-  }
-
-  async migrateHdWallet({ v4hdWallet }: { v4hdWallet: IV4DBWallet }) {
+  async migrateWatchingAccounts({ v4wallet }: { v4wallet: IV4DBWallet }) {
     const { serviceAccount, servicePassword, serviceNetwork } =
       this.backgroundApi;
-    const { mnemonic } = await this.revealV4Mnemonic({
-      hdWalletId: v4hdWallet.id,
+    const v4accounts = await this.getV4AccountsOfWallet({
+      v4wallet,
+    });
+    for (const v4account of v4accounts) {
+      const networkId = v4CoinTypeToNetworkId[v4account.coinType];
+      if (networkId) {
+        const deriveTypeInTpl = await serviceNetwork.getDeriveTypeByTemplate({
+          networkId,
+          template: v4account.template,
+        });
+        let deriveTypes: IAccountDeriveTypes[] = [deriveTypeInTpl];
+
+        const v4accountUtxo = v4account as IV4DBUtxoAccount;
+        const input =
+          // v4accountUtxo?.xpubSegwit || // xpubSegwit import not support yet
+          v4accountUtxo?.xpub || v4account?.pub || v4account?.address;
+
+        const validateResult =
+          await serviceAccount.validateGeneralInputOfImporting({
+            networkId,
+            input: await servicePassword.encodeSensitiveText({ text: input }),
+            validateAddress: true,
+            validateXpub: true,
+          });
+        if (validateResult?.deriveInfoItems?.length) {
+          const availableDeriveTypes = (
+            await serviceNetwork.getDeriveInfoItemsOfNetwork({
+              networkId,
+              enabledItems: validateResult.deriveInfoItems,
+            })
+          ).map((item) => item.value);
+          deriveTypes = [
+            ...deriveTypes,
+            ...(availableDeriveTypes as IAccountDeriveTypes[]),
+          ];
+        }
+        deriveTypes = uniq(deriveTypes);
+        for (const deriveType of deriveTypes) {
+          // TODO save error log if failed
+          await serviceAccount.addWatchingAccount({
+            input,
+            name: v4account.name,
+            networkId,
+            deriveType,
+            isUrlAccount: false,
+            skipAddIfNotEqualToAddress: v4account.address,
+          });
+        }
+      }
+    }
+  }
+
+  async migrateImportedAccounts({ v4wallet }: { v4wallet: IV4DBWallet }) {
+    const { serviceAccount, servicePassword, serviceNetwork } =
+      this.backgroundApi;
+    const v4ImportedAccounts = await this.getV4AccountsOfWallet({
+      v4wallet,
+    });
+    for (const v4account of v4ImportedAccounts) {
+      const credential = await this.revealV4ImportedPrivateKey({
+        accountId: v4account.id,
+      });
+      const { privateKey: v4privateKey } = credential;
+      const networkId = v4CoinTypeToNetworkId[v4account.coinType];
+      if (networkId) {
+        const deriveType = await serviceNetwork.getDeriveTypeByTemplate({
+          networkId,
+          template: v4account.template,
+        });
+        await serviceAccount.addImportedAccountWithCredential({
+          name: v4account.name,
+          credential: await servicePassword.encodeSensitiveText({
+            text: v4privateKey,
+          }),
+          networkId,
+          deriveType,
+        });
+      }
+    }
+  }
+
+  async migrateHdWallet({ v4wallet }: { v4wallet: IV4DBWallet }) {
+    const { serviceAccount, servicePassword, serviceNetwork } =
+      this.backgroundApi;
+    const { mnemonic } = await this.revealV4HdMnemonic({
+      hdWalletId: v4wallet.id,
     });
     const { wallet: v5wallet } = await serviceAccount.createHDWallet({
-      name: v4hdWallet.name,
+      name: v4wallet.name,
       mnemonic: await servicePassword.encodeSensitiveText({
         text: mnemonic,
       }),
     });
     const v4accounts: IV4DBAccount[] = await this.getV4AccountsOfWallet({
-      v4hdWallet,
+      v4wallet,
     });
 
     // const indexes: Array<number | undefined> = v4accounts.map((a) =>
@@ -344,23 +478,16 @@ export class V4ToV5MigrationController {
         if (coinType) {
           const networkId = v4CoinTypeToNetworkId[coinType];
           if (networkId) {
-            const deriveInfoItems =
-              await serviceNetwork.getDeriveInfoItemsOfNetwork({
-                networkId,
-              });
-            const deriveInfo = deriveInfoItems.find(
-              (item) => item.item.template === v4account.template,
-            );
-            // TODO move to serviceNetwork
-            const deriveType = deriveInfo?.value as
-              | IAccountDeriveTypes
-              | undefined;
+            const deriveType = await serviceNetwork.getDeriveTypeByTemplate({
+              networkId,
+              template: v4account.template,
+            });
             await serviceAccount.addHDOrHWAccounts({
               walletId: v5wallet.id,
               networkId,
               indexes: [index],
               indexedAccountId: undefined,
-              deriveType: deriveType || ('default' as any),
+              deriveType,
             });
           }
         }
@@ -369,3 +496,5 @@ export class V4ToV5MigrationController {
     // TODO get deriveType and networkId by coinType
   }
 }
+
+export default ServiceV4Migration;
