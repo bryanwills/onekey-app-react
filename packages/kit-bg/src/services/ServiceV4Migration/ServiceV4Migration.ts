@@ -603,6 +603,8 @@ class ServiceV4Migration extends ServiceBase {
           indexes: [index],
           indexedAccountId: undefined,
           deriveType,
+          skipDeviceCancel: true,
+          hideCheckingDeviceLoading: true,
         });
       }
     }

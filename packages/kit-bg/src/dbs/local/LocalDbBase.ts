@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // eslint-disable-next-line max-classes-per-file
 
-import { isNil, max, uniq } from 'lodash';
+import { isNil, uniq } from 'lodash';
 import natsort from 'natsort';
 
 import type { IBip39RevealableSeed } from '@onekeyhq/core/src/secret';
@@ -59,6 +59,7 @@ import { EDBAccountType } from './consts';
 import { LocalDbBaseContainer } from './LocalDbBaseContainer';
 import { ELocalDBStoreNames } from './localDBStoreNames';
 
+import type { RealmSchemaWallet } from './realm/schemas/RealmSchemaWallet';
 import type {
   IDBAccount,
   IDBAccountDerivation,
@@ -131,9 +132,8 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
       type: walletId,
       backuped: true,
       accounts: [],
-      nextIndex: 0,
       walletNo: walletConfig?.[walletId]?.walletNo ?? 0,
-      nextAccountIds: { 'global': 1 },
+      nextAccountIds: { 'global': 1, 'index': 0 },
     };
     return record;
   }
@@ -741,22 +741,27 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
       records,
     });
     console.log('txAddIndexedAccount txGetWallet');
-    const [wallet] = await this.txGetWallet({
-      tx,
-      walletId,
-    });
-    const { nextIndex } = wallet;
-    const maxIndex = max(indexes);
-    if (!isNil(maxIndex) && maxIndex >= nextIndex) {
-      await this.txUpdateWallet({
-        tx,
-        walletId,
-        updater: (w) => {
-          w.nextIndex = maxIndex + 1;
-          return w;
-        },
-      });
-    }
+    // const [wallet] = await this.txGetWallet({
+    //   tx,
+    //   walletId,
+    // });
+    // const nextIndex = this.getWalletNextAccountId({
+    //   wallet,
+    //   key: 'index',
+    //   defaultValue: 0,
+    // });
+    // const maxIndex = max(indexes);
+    // if (!isNil(maxIndex) && maxIndex >= nextIndex) {
+    //   await this.txUpdateWallet({
+    //     tx,
+    //     walletId,
+    //     updater: (w) => {
+    //       w.nextAccountIds = w.nextAccountIds || {};
+    //       w.nextAccountIds.index = maxIndex + 1;
+    //       return w;
+    //     },
+    //   });
+    // }
   }
 
   async addHDNextIndexedAccount({ walletId }: { walletId: string }) {
@@ -788,16 +793,60 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
       walletId,
     });
     console.log('txAddHDNextIndexedAccount get wallet', wallet);
-    let { nextIndex } = wallet;
+    let nextIndex = this.getWalletNextAccountId({
+      wallet,
+      key: 'index',
+      defaultValue: 0,
+    });
+
+    let maxLoop = 0;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const indexedAccountId = accountUtils.buildIndexedAccountId({
+        walletId,
+        index: nextIndex,
+      });
+      try {
+        const result = await this.txGetRecordById({
+          tx,
+          name: ELocalDBStoreNames.IndexedAccount,
+          id: indexedAccountId,
+        });
+        const indexedAccount = result?.[0];
+        if (!indexedAccount || !result) {
+          break;
+        }
+      } catch (error) {
+        break;
+      }
+      if (maxLoop >= 1000) {
+        break;
+      }
+      nextIndex += 1;
+      maxLoop += 1;
+    }
+
     if (onlyAddFirst) {
       nextIndex = 0;
     }
+
     await this.txAddIndexedAccount({
       tx,
       walletId,
       indexes: [nextIndex],
       skipIfExists: true,
     });
+
+    await this.txUpdateWallet({
+      tx,
+      walletId,
+      updater: (w) => {
+        w.nextAccountIds = w.nextAccountIds || {};
+        w.nextAccountIds.index = nextIndex + 1;
+        return w;
+      },
+    });
+
     return {
       nextIndex,
       indexedAccountId: accountUtils.buildIndexedAccountId({
@@ -869,9 +918,10 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
             avatar: avatar && JSON.stringify(avatar), // TODO save object to realmDB?
             type: WALLET_TYPE_HD,
             backuped,
-            nextAccountIds: {},
+            nextAccountIds: {
+              index: firstAccountIndex,
+            },
             accounts: [],
-            nextIndex: firstAccountIndex,
             walletNo: context.nextWalletNo,
           },
         ],
@@ -1059,8 +1109,9 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
             associatedDevice: dbDeviceId,
             isTemp: false,
             passphraseState: '',
-            nextIndex: firstAccountIndex,
-            nextAccountIds: {},
+            nextAccountIds: {
+              index: firstAccountIndex,
+            },
             accounts: [],
             walletNo: context.nextWalletNo,
             xfp,
@@ -1259,8 +1310,9 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
             associatedDevice: dbDeviceId,
             isTemp: false,
             passphraseState,
-            nextIndex: firstAccountIndex,
-            nextAccountIds: {},
+            nextAccountIds: {
+              index: firstAccountIndex,
+            },
             accounts: [],
             walletNo: context.nextWalletNo,
           },
@@ -1656,14 +1708,17 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
     key,
     defaultValue,
   }: {
-    nextAccountIds: {
-      [key: string]: number;
-    };
+    nextAccountIds:
+      | {
+          [key: string]: number;
+        }
+      | undefined;
     key: string;
     defaultValue: number;
   }) {
-    const val = nextAccountIds[key];
+    const val = nextAccountIds?.[key];
 
+    // RealmDB ERROR: RangeError: number is not integral
     // realmDB return NaN, indexedDB return undefined
     if (Number.isNaN(val) || isNil(val)) {
       // realmDB RangeError: number is not integral
@@ -1672,6 +1727,22 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
       return defaultValue;
     }
     return val ?? defaultValue;
+  }
+
+  getWalletNextAccountId({
+    wallet,
+    key,
+    defaultValue,
+  }: {
+    wallet: IDBWallet | RealmSchemaWallet;
+    key: 'global' | 'index';
+    defaultValue: number;
+  }) {
+    return this.getNextAccountId({
+      nextAccountIds: wallet.nextAccountIds,
+      key,
+      defaultValue,
+    });
   }
 
   async addAccountsToWallet({
@@ -1689,9 +1760,11 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
 
     this.validateAccountsFields(accounts);
 
-    let nextAccountId = await this.getWalletNextAccountId({
-      walletId,
+    const wallet = await this.getWallet({ walletId });
+    let nextAccountId: number = this.getWalletNextAccountId({
+      wallet,
       key: 'global',
+      defaultValue: 1,
     });
 
     await db.withTransaction(async (tx) => {
@@ -1764,14 +1837,12 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
           updater: (w) => {
             w.nextAccountIds = w.nextAccountIds || {};
 
-            w.nextAccountIds.global =
-              // RealmDB return NaN, indexedDB return undefined
-              // RealmDB ERROR: RangeError: number is not integral
-              this.getNextAccountId({
-                nextAccountIds: w.nextAccountIds,
-                key: 'global',
-                defaultValue: 1,
-              }) + actualAdded;
+            const currentNextAccountId = this.getWalletNextAccountId({
+              wallet: w,
+              key: 'global',
+              defaultValue: 1,
+            });
+            w.nextAccountIds.global = currentNextAccountId + actualAdded;
 
             // RealmDB Error: Expected 'accounts[0]' to be a string, got an instance of List
             // w.accounts is List not Array in realmDB
@@ -1812,17 +1883,6 @@ export abstract class LocalDbBase extends LocalDbBaseContainer {
 
       // TODO should add accountId to wallet.accounts or wallet.indexedAccounts?
     });
-  }
-
-  async getWalletNextAccountId({
-    walletId,
-    key = 'global',
-  }: {
-    walletId: IDBWalletId;
-    key?: string | 'global';
-  }) {
-    const wallet = await this.getWallet({ walletId });
-    return wallet.nextAccountIds[key] ?? 1;
   }
 
   // ---------------------------------------------- account
